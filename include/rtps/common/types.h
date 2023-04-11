@@ -38,6 +38,7 @@ namespace rtps {
 
 typedef uint16_t Ip4Port_t;
 typedef uint16_t DataSize_t;
+typedef uint32_t FragDataSize_t;
 typedef int8_t ParticipantId_t; // With UDP only 120 possible
 
 enum class EntityKind_t : uint8_t {

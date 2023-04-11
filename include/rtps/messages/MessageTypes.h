@@ -168,6 +168,29 @@ struct SubmessageHeader {
   }
 };
 
+struct SubmessageDataFrag {
+  SubmessageHeader header;
+  uint16_t extraFlags;
+  uint16_t octetsToInlineQos;
+  EntityId_t readerId;
+  EntityId_t writerId;
+  SequenceNumber_t writerSN;
+  uint32_t fragStartingNumber;
+  uint16_t fragmentsInSubmessage;
+  uint16_t fragmentSize;
+  uint32_t sampleSize;
+  static constexpr uint16_t getRawSize() {
+    return SubmessageHeader::getRawSize()
+           + sizeof(uint16_t)  + sizeof(uint16_t)
+           + (2 * 3 + 2 * 1) // EntityID
+           + sizeof(SequenceNumber_t)
+           + sizeof(uint32_t)
+           + sizeof(uint16_t)
+           + sizeof(uint16_t)
+           + sizeof(uint32_t);
+  }
+};
+
 struct SubmessageData {
   SubmessageHeader header;
   uint16_t extraFlags;
@@ -288,6 +311,39 @@ bool serializeMessage(Buffer &buffer, SubmessageData &msg) {
                 sizeof(msg.writerSN.high));
   buffer.append(reinterpret_cast<uint8_t *>(&msg.writerSN.low),
                 sizeof(msg.writerSN.low));
+  return true;
+}
+
+template <typename Buffer>
+bool serializeMessage(Buffer &buffer, SubmessageDataFrag &msg) {
+  if (!buffer.reserve(SubmessageDataFrag::getRawSize())) {
+    return false;
+  }
+
+  serializeMessage(buffer, msg.header);
+
+  buffer.append(reinterpret_cast<uint8_t *>(&msg.extraFlags), sizeof(uint16_t));
+  buffer.append(reinterpret_cast<uint8_t *>(&msg.octetsToInlineQos),
+                sizeof(uint16_t));
+  buffer.append(msg.readerId.entityKey.data(), msg.readerId.entityKey.size());
+  buffer.append(reinterpret_cast<uint8_t *>(&msg.readerId.entityKind),
+                sizeof(EntityKind_t));
+  buffer.append(msg.writerId.entityKey.data(), msg.writerId.entityKey.size());
+  buffer.append(reinterpret_cast<uint8_t *>(&msg.writerId.entityKind),
+                sizeof(EntityKind_t));
+  buffer.append(reinterpret_cast<uint8_t *>(&msg.writerSN.high),
+                sizeof(msg.writerSN.high));
+  buffer.append(reinterpret_cast<uint8_t *>(&msg.writerSN.low),
+                sizeof(msg.writerSN.low));
+  buffer.append(reinterpret_cast<uint8_t *>(&msg.fragStartingNumber),
+                sizeof(uint32_t));
+  buffer.append(reinterpret_cast<uint8_t *>(&msg.fragmentsInSubmessage),
+                sizeof(uint16_t));
+  buffer.append(reinterpret_cast<uint8_t *>(&msg.fragmentSize),
+                sizeof(uint16_t));
+  buffer.append(reinterpret_cast<uint8_t *>(&msg.sampleSize),
+                sizeof(uint32_t));
+
   return true;
 }
 

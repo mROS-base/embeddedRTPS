@@ -47,6 +47,21 @@ public:
     return it == m_tail;
   }
 
+  const CacheChange *addChange(CacheChange::SerializerCallback func,
+                              FragDataSize_t size) {
+    CacheChange change;
+    change.kind = ChangeKind_t::ALIVE;
+    change.sizeToBeSerialized = size;
+    change.serializerCallback = func;
+    change.sequenceNumber = ++m_lastUsedSequenceNumber;
+
+    CacheChange *place = &m_buffer[m_head];
+    incrementHead();
+
+    *place = std::move(change);
+    return place;
+  }
+
   const CacheChange *addChange(const uint8_t *data, DataSize_t size) {
     CacheChange change;
     change.kind = ChangeKind_t::ALIVE;

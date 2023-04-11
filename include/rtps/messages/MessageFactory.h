@@ -99,6 +99,49 @@ void addSubMessageTimeStamp(Buffer &buffer, bool setInvalid = false) {
 }
 
 template <class Buffer>
+void addSubMessageDataFrag(Buffer &buffer, const Buffer &filledPayload,
+                       bool containsInlineQos, const SequenceNumber_t &SN,
+                       uint32_t fragStartingNumber,
+                       uint16_t fragSize,
+                       uint32_t sampleSize,
+                       const EntityId_t &writerID, const EntityId_t &readerID) {
+  SubmessageDataFrag msg;
+  msg.header.submessageId = SubmessageKind::DATA_FRAG;
+#if IS_LITTLE_ENDIAN
+  msg.header.flags = FLAG_LITTLE_ENDIAN;
+#else
+  msg.header.flags = FLAG_BIG_ENDIAN;
+#endif
+
+  msg.header.octetsToNextHeader = 0;
+
+  if (containsInlineQos) {
+    msg.header.flags |= FLAG_INLINE_QOS;
+  }
+
+  msg.writerSN = SN;
+  msg.extraFlags = 0;
+  msg.readerId = readerID;
+  msg.writerId = writerID;
+  msg.fragStartingNumber = fragStartingNumber;
+  msg.fragmentsInSubmessage = 1;
+  msg.fragmentSize = fragSize;
+  msg.sampleSize = sampleSize;
+
+  constexpr uint16_t octetsToInlineQoS =
+         4  + 4    + 8              + 4              + 2                     + 2            + 4;
+      // EntityIds + SequenceNumber + FragmentNumber + fragmentsInSubmessage + fragmentSize + sampleSize
+  msg.octetsToInlineQos = octetsToInlineQoS;
+
+  serializeMessage(buffer, msg);
+
+  if (filledPayload.isValid()) {
+    Buffer shallowCopy = filledPayload;
+    buffer.append(std::move(shallowCopy));
+  }
+}
+
+template <class Buffer>
 void addSubMessageData(Buffer &buffer, const Buffer &filledPayload,
                        bool containsInlineQos, const SequenceNumber_t &SN,
                        const EntityId_t &writerID, const EntityId_t &readerID) {

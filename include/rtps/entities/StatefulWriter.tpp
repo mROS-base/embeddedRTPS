@@ -194,6 +194,13 @@ void StatefulWriterT<NetworkDriver>::removeReaderOfParticipant(
 }
 
 template <class NetworkDriver>
+const rtps::CacheChange *StatefulWriterT<NetworkDriver>::newChangeCallback(
+    ChangeKind_t kind, CacheChange::SerializerCallback func, FragDataSize_t size){
+  // Not supported
+  return nullptr;
+}
+
+template <class NetworkDriver>
 const rtps::CacheChange *StatefulWriterT<NetworkDriver>::newChange(
     ChangeKind_t kind, const uint8_t *data, DataSize_t size) {
   if (isIrrelevant(kind)) {

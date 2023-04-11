@@ -46,6 +46,8 @@ public:
   void progress() override;
   const CacheChange *newChange(ChangeKind_t kind, const uint8_t *data,
                                DataSize_t size) override;
+  const CacheChange *newChangeCallback(ChangeKind_t kind,
+				       CacheChange::SerializerCallback func, FragDataSize_t size) override;
   void setAllChangesToUnsent() override;
   void onNewAckNack(const SubmessageAckNack &msg,
                     const GuidPrefix_t &sourceGuidPrefix) override;

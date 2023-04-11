@@ -46,6 +46,8 @@ public:
   virtual void progress() = 0;
   virtual const CacheChange *newChange(ChangeKind_t kind, const uint8_t *data,
                                        DataSize_t size) = 0;
+  virtual const CacheChange *newChangeCallback(ChangeKind_t kind,
+					       CacheChange::SerializerCallback func, FragDataSize_t) = 0;
   virtual void setAllChangesToUnsent() = 0;
   virtual void onNewAckNack(const SubmessageAckNack &msg,
                             const GuidPrefix_t &sourceGuidPrefix) = 0;

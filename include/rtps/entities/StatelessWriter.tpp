@@ -174,6 +174,32 @@ void StatelessWriterT<NetworkDriver>::removeReaderOfParticipant(
 }
 
 template <typename NetworkDriver>
+const CacheChange *StatelessWriterT<NetworkDriver>::newChangeCallback(
+    rtps::ChangeKind_t kind, CacheChange::SerializerCallback func,
+    FragDataSize_t size) {
+  if (isIrrelevant(kind)) {
+    return nullptr;
+  }
+  Lock lock(m_mutex);
+
+  if (m_history.isFull()) {
+    SequenceNumber_t newMin = ++SequenceNumber_t(m_history.getSeqNumMin());
+    if (m_nextSequenceNumberToSend < newMin) {
+      m_nextSequenceNumberToSend =
+          newMin; // Make sure we have the correct sn to send
+    }
+  }
+
+  auto *result = m_history.addChange(func, size);
+  if (mp_threadPool != nullptr) {
+    mp_threadPool->addWorkload(this);
+  }
+
+  SLW_LOG("Adding new data as a callback function.\n");
+  return result;
+}
+
+template <typename NetworkDriver>
 const CacheChange *StatelessWriterT<NetworkDriver>::newChange(
     rtps::ChangeKind_t kind, const uint8_t *data, DataSize_t size) {
   if (isIrrelevant(kind)) {
@@ -234,15 +260,9 @@ void StatelessWriterT<NetworkDriver>::progress() {
   }
 
   for (const auto &proxy : m_proxies) {
-
     SLW_LOG("Progess.\n");
     // Do nothing, if someone else sends for me... (Multicast)
     if (proxy.useMulticast || !proxy.suppressUnicast || m_enforceUnicast) {
-      PacketInfo info;
-      info.srcPort = m_packetInfo.srcPort;
-
-      MessageFactory::addHeader(info.buffer, m_attributes.endpointGuid.prefix);
-      MessageFactory::addSubMessageTimeStamp(info.buffer);
 
       {
         Lock lock(m_mutex);
@@ -269,24 +289,68 @@ void StatelessWriterT<NetworkDriver>::progress() {
         } else {
           reid = proxy.remoteReaderGuid.entityId;
         }
-        MessageFactory::addSubMessageData(info.buffer, next->data, false,
+
+        if (next->serializerCallback) {
+          int fragment_start_number = 1;
+          FragDataSize_t sampleSize = next->sizeToBeSerialized;
+          CacheChange::SerializedBuf serialized_buf;
+          while(1) {
+            serialized_buf = next->serializerCallback();
+            if (0 != serialized_buf.second) {
+              PBufWrapper data;
+              PacketInfo info;
+              info.srcPort = m_packetInfo.srcPort;
+
+              MessageFactory::addHeader(info.buffer, m_attributes.endpointGuid.prefix);
+              MessageFactory::addSubMessageTimeStamp(info.buffer);
+              data.reserve(serialized_buf.second);
+              data.append(serialized_buf.first,
+                          serialized_buf.second);
+              MessageFactory::addSubMessageDataFrag(info.buffer, data, false,
+                                          next->sequenceNumber,
+                                          fragment_start_number ++,
+                                          serialized_buf.second,
+                                          sampleSize,
+                                          m_attributes.endpointGuid.entityId,
+                                          reid); // TODO
+              // Just usable for IPv4
+              // Decide which locator to be used unicast/multicast
+              if (proxy.useMulticast && !m_enforceUnicast) {
+                info.destAddr = proxy.remoteMulticastLocator.getIp4Address();
+                info.destPort = (Ip4Port_t)proxy.remoteMulticastLocator.port;
+              } else {
+                info.destAddr = proxy.remoteLocator.getIp4Address();
+                info.destPort = (Ip4Port_t)proxy.remoteLocator.port;
+              }
+
+              m_transport->sendPacket(info);
+            } else {
+              break;
+            }
+          }
+        } else {
+          PacketInfo info;
+          info.srcPort = m_packetInfo.srcPort;
+
+          MessageFactory::addHeader(info.buffer, m_attributes.endpointGuid.prefix);
+          MessageFactory::addSubMessageTimeStamp(info.buffer);
+          MessageFactory::addSubMessageData(info.buffer, next->data, false,
                                           next->sequenceNumber,
                                           m_attributes.endpointGuid.entityId,
                                           reid); // TODO
+          // Just usable for IPv4
+          // Decide which locator to be used unicast/multicast
+          if (proxy.useMulticast && !m_enforceUnicast) {
+            info.destAddr = proxy.remoteMulticastLocator.getIp4Address();
+            info.destPort = (Ip4Port_t)proxy.remoteMulticastLocator.port;
+          } else {
+            info.destAddr = proxy.remoteLocator.getIp4Address();
+            info.destPort = (Ip4Port_t)proxy.remoteLocator.port;
+          }
+
+          m_transport->sendPacket(info);
+        }
       }
-
-      // Just usable for IPv4
-      // Decide which locator to be used unicast/multicast
-
-      if (proxy.useMulticast && !m_enforceUnicast) {
-        info.destAddr = proxy.remoteMulticastLocator.getIp4Address();
-        info.destPort = (Ip4Port_t)proxy.remoteMulticastLocator.port;
-      } else {
-        info.destAddr = proxy.remoteLocator.getIp4Address();
-        info.destPort = (Ip4Port_t)proxy.remoteLocator.port;
-      }
-
-      m_transport->sendPacket(info);
     }
   }
 
