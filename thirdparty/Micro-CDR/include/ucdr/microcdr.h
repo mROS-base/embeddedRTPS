@@ -21,7 +21,7 @@ extern "C" {
 
 #include <ucdr/common.h>
 #include <ucdr/types/basic.h>
-#include <ucdr/types/string.h>
+#include <ucdr/types/ucdr_string.h>
 #include <ucdr/types/array.h>
 #include <ucdr/types/sequence.h>
 
