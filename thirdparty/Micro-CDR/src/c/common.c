@@ -14,7 +14,7 @@
 
 #include <ucdr/common.h>
 
-#include <string.h>
+#include <ucdr_string.h>
 
 #if __BIG_ENDIAN__
     const ucdrEndianness UCDR_MACHINE_ENDIANNESS = UCDR_BIG_ENDIANNESS;
