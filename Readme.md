@@ -1,3 +1,7 @@
+**NOTE:**　This branch has been modified to allow mros2 development in mbed studio.
+
+
+
 **NOTE:** We maintain this repository as the component of [mros2](https://github.com/mROS-base/mros2), by adding some modifications (e.g., [PR#11](https://github.com/mROS-base/embeddedRTPS/pull/11)). So the base branch of this repository has been set to `mros2`.
 The branch and commit of [the original (forked) repository](https://github.com/embedded-software-laboratory/embeddedRTPS) are [mros2_master](https://github.com/mROS-base/embeddedRTPS/tree/mros2_master) and [1410a87](https://github.com/mROS-base/embeddedRTPS/commit/1410a8776660244249a84031ffa78c9bdaa45e19), respectively.
 

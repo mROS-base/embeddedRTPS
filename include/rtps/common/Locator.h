@@ -82,6 +82,7 @@ struct FullLengthLocator {
     } else {
       ucdr_serialize_array_uint8_t(&buffer, reinterpret_cast<uint8_t *>(this),
                                    sizeof(FullLengthLocator));
+      return true;
     }
   }
 
