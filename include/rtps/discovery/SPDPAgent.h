@@ -44,13 +44,15 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #define SPDP_LOG(...) //
 #endif
 
-namespace rtps {
+namespace rtps
+{
 class Participant;
 class Writer;
 class Reader;
 class ReaderCacheChange;
 
-class SPDPAgent {
+class SPDPAgent
+{
 public:
   ~SPDPAgent();
   void init(Participant &participant, BuiltInEndpoints &endpoints);

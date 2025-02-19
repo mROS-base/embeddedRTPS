@@ -31,7 +31,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 
 #include <array>
 
-namespace rtps {
+namespace rtps
+{
 enum class LocatorKind_t : int32_t {
   LOCATOR_KIND_INVALID = -1,
   LOCATOR_KIND_RESERVED = 0,
@@ -41,7 +42,8 @@ enum class LocatorKind_t : int32_t {
 
 const uint32_t LOCATOR_PORT_INVALID = 0;
 const std::array<uint8_t, 16> LOCATOR_ADDRESS_INVALID = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
 
 /*
  * This representation corresponds to the RTPS wire format
@@ -50,11 +52,12 @@ struct FullLengthLocator {
   LocatorKind_t kind = LocatorKind_t::LOCATOR_KIND_INVALID;
   uint32_t port = LOCATOR_PORT_INVALID;
   std::array<uint8_t, 16> address =
-      LOCATOR_ADDRESS_INVALID; // TODO make private such that kind and address
-                               // always match?
+    LOCATOR_ADDRESS_INVALID; // TODO make private such that kind and address
+  // always match?
 
   static FullLengthLocator createUDPv4Locator(uint8_t a, uint8_t b, uint8_t c,
-                                              uint8_t d, uint32_t port) {
+      uint8_t d, uint32_t port)
+  {
     FullLengthLocator locator;
     locator.kind = LocatorKind_t::LOCATOR_KIND_UDPv4;
     locator.address = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, a, b, c, d};
@@ -62,11 +65,18 @@ struct FullLengthLocator {
     return locator;
   }
 
-  void setInvalid() { kind = LocatorKind_t::LOCATOR_KIND_INVALID; }
+  void setInvalid()
+  {
+    kind = LocatorKind_t::LOCATOR_KIND_INVALID;
+  }
 
-  bool isValid() const { return kind != LocatorKind_t::LOCATOR_KIND_INVALID; }
+  bool isValid() const
+  {
+    return kind != LocatorKind_t::LOCATOR_KIND_INVALID;
+  }
 
-  bool readFromUcdrBuffer(ucdrBuffer &buffer) {
+  bool readFromUcdrBuffer(ucdrBuffer &buffer)
+  {
     if (ucdr_buffer_remaining(&buffer) < sizeof(FullLengthLocator)) {
       return false;
     } else {
@@ -76,7 +86,8 @@ struct FullLengthLocator {
     }
   }
 
-  bool serializeIntoUdcrBuffer(ucdrBuffer &buffer) {
+  bool serializeIntoUdcrBuffer(ucdrBuffer &buffer)
+  {
     if (ucdr_buffer_remaining(&buffer) < sizeof(FullLengthLocator)) {
       return false;
     } else {
@@ -85,57 +96,69 @@ struct FullLengthLocator {
     }
   }
 
-  ip4_addr_t getIp4Address() const {
+  ip4_addr_t getIp4Address() const
+  {
     return transformIP4ToU32(address[12], address[13], address[14],
                              address[15]);
   }
 
-  bool isSameAddress(ip4_addr_t *address) {
+  bool isSameAddress(ip4_addr_t *address)
+  {
     ip4_addr_t ownaddress = getIp4Address();
     return ip4_addr_cmp(&ownaddress, address);
   }
 
-  inline bool isSameSubnet() const {
+  inline bool isSameSubnet() const
+  {
     return UdpDriver::isSameSubnet(getIp4Address());
   }
 
-  inline bool isMulticastAddress() const {
+  inline bool isMulticastAddress() const
+  {
     return UdpDriver::isMulticastAddress(getIp4Address());
   }
 
-  inline uint32_t getLocatorPort() { return static_cast<Ip4Port_t>(port); }
+  inline uint32_t getLocatorPort()
+  {
+    return static_cast<Ip4Port_t>(port);
+  }
 
 } __attribute__((packed));
 
 inline FullLengthLocator
-getBuiltInUnicastLocator(ParticipantId_t participantId) {
+getBuiltInUnicastLocator(ParticipantId_t participantId)
+{
   return FullLengthLocator::createUDPv4Locator(
-      Config::IP_ADDRESS[0], Config::IP_ADDRESS[1], Config::IP_ADDRESS[2],
-      Config::IP_ADDRESS[3], getBuiltInUnicastPort(participantId));
+           Config::IP_ADDRESS[0], Config::IP_ADDRESS[1], Config::IP_ADDRESS[2],
+           Config::IP_ADDRESS[3], getBuiltInUnicastPort(participantId));
 }
 
-inline FullLengthLocator getBuiltInMulticastLocator() {
+inline FullLengthLocator getBuiltInMulticastLocator()
+{
   return FullLengthLocator::createUDPv4Locator(239, 255, 0, 1,
-                                               getBuiltInMulticastPort());
+         getBuiltInMulticastPort());
 }
 
-inline FullLengthLocator getUserUnicastLocator(ParticipantId_t participantId) {
+inline FullLengthLocator getUserUnicastLocator(ParticipantId_t participantId)
+{
   return FullLengthLocator::createUDPv4Locator(
-      Config::IP_ADDRESS[0], Config::IP_ADDRESS[1], Config::IP_ADDRESS[2],
-      Config::IP_ADDRESS[3], getUserUnicastPort(participantId));
+           Config::IP_ADDRESS[0], Config::IP_ADDRESS[1], Config::IP_ADDRESS[2],
+           Config::IP_ADDRESS[3], getUserUnicastPort(participantId));
 }
 
 inline FullLengthLocator
-getUserMulticastLocator() { // this would be a unicastaddress, as
-                            // defined in config
+getUserMulticastLocator()   // this would be a unicastaddress, as
+{
+  // defined in config
   return FullLengthLocator::createUDPv4Locator(
-      Config::IP_ADDRESS[0], Config::IP_ADDRESS[1], Config::IP_ADDRESS[2],
-      Config::IP_ADDRESS[3], getUserMulticastPort());
+           Config::IP_ADDRESS[0], Config::IP_ADDRESS[1], Config::IP_ADDRESS[2],
+           Config::IP_ADDRESS[3], getUserMulticastPort());
 }
 
-inline FullLengthLocator getDefaultSendMulticastLocator() {
+inline FullLengthLocator getDefaultSendMulticastLocator()
+{
   return FullLengthLocator::createUDPv4Locator(239, 255, 0, 1,
-                                               getBuiltInMulticastPort());
+         getBuiltInMulticastPort());
 }
 
 /*
@@ -147,7 +170,8 @@ struct LocatorIPv4 {
   uint32_t port = LOCATOR_PORT_INVALID;
 
   LocatorIPv4() = default;
-  LocatorIPv4(const FullLengthLocator &locator) {
+  LocatorIPv4(const FullLengthLocator &locator)
+  {
     address[0] = locator.address[12];
     address[1] = locator.address[13];
     address[2] = locator.address[14];
@@ -156,19 +180,28 @@ struct LocatorIPv4 {
     kind = locator.kind;
   }
 
-  ip4_addr_t getIp4Address() const {
+  ip4_addr_t getIp4Address() const
+  {
     return transformIP4ToU32(address[0], address[1], address[2], address[3]);
   }
 
-  void setInvalid() { kind = LocatorKind_t::LOCATOR_KIND_INVALID; }
+  void setInvalid()
+  {
+    kind = LocatorKind_t::LOCATOR_KIND_INVALID;
+  }
 
-  bool isValid() const { return kind != LocatorKind_t::LOCATOR_KIND_INVALID; }
+  bool isValid() const
+  {
+    return kind != LocatorKind_t::LOCATOR_KIND_INVALID;
+  }
 
-  inline bool isSameSubnet() const {
+  inline bool isSameSubnet() const
+  {
     return UdpDriver::isSameSubnet(getIp4Address());
   }
 
-  inline bool isMulticastAddress() const {
+  inline bool isMulticastAddress() const
+  {
     return UdpDriver::isMulticastAddress(getIp4Address());
   }
 };

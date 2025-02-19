@@ -33,7 +33,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include <array>
 #include <rtps/common/Locator.h>
 
-namespace rtps {
+namespace rtps
+{
 
 struct BuiltInTopicKey {
   std::array<uint32_t, 3> value;
@@ -49,20 +50,22 @@ struct TopicData {
   FullLengthLocator multicastLocator;
 
   TopicData()
-      : endpointGuid(GUID_UNKNOWN), typeName{'\0'}, topicName{'\0'},
-        reliabilityKind(ReliabilityKind_t::BEST_EFFORT),
-        durabilityKind(DurabilityKind_t::TRANSIENT_LOCAL) {
+    : endpointGuid(GUID_UNKNOWN), typeName{'\0'}, topicName{'\0'},
+      reliabilityKind(ReliabilityKind_t::BEST_EFFORT),
+      durabilityKind(DurabilityKind_t::TRANSIENT_LOCAL)
+  {
     rtps::FullLengthLocator someLocator =
-        rtps::FullLengthLocator::createUDPv4Locator(
-            192, 168, 0, 42, rtps::getUserUnicastPort(0));
+      rtps::FullLengthLocator::createUDPv4Locator(
+        192, 168, 0, 42, rtps::getUserUnicastPort(0));
     unicastLocator = someLocator;
     multicastLocator = FullLengthLocator();
   };
 
   TopicData(Guid_t guid, ReliabilityKind_t reliability, FullLengthLocator loc)
-      : endpointGuid(guid), typeName{'\0'}, topicName{'\0'},
-        reliabilityKind(reliability),
-        durabilityKind(DurabilityKind_t::TRANSIENT_LOCAL), unicastLocator(loc) {
+    : endpointGuid(guid), typeName{'\0'}, topicName{'\0'},
+      reliabilityKind(reliability),
+      durabilityKind(DurabilityKind_t::TRANSIENT_LOCAL), unicastLocator(loc)
+  {
   }
 
   bool matchesTopicOf(const TopicData &other);
@@ -81,10 +84,11 @@ struct TopicDataCompressed {
   LocatorIPv4 multicastLocator;
 
   TopicDataCompressed() = default;
-  TopicDataCompressed(const TopicData &topic_data) {
+  TopicDataCompressed(const TopicData &topic_data)
+  {
     endpointGuid = topic_data.endpointGuid;
     topicHash =
-        hashCharArray(topic_data.topicName, Config::MAX_TOPICNAME_LENGTH);
+      hashCharArray(topic_data.topicName, Config::MAX_TOPICNAME_LENGTH);
     typeHash = hashCharArray(topic_data.typeName, Config::MAX_TYPENAME_LENGTH);
     reliabilityKind = topic_data.reliabilityKind;
     durabilityKind = topic_data.durabilityKind;

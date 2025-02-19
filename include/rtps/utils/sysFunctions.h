@@ -28,8 +28,10 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "lwip/sys.h"
 #include "rtps/common/types.h"
 
-namespace rtps {
-inline Time_t getCurrentTimeStamp() {
+namespace rtps
+{
+inline Time_t getCurrentTimeStamp()
+{
   Time_t now;
   // TODO FIX
   uint32_t nowMs = sys_now();

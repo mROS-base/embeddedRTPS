@@ -29,7 +29,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/common/types.h"
 #include "rtps/storages/PBufWrapper.h"
 
-namespace rtps {
+namespace rtps
+{
 struct CacheChange {
   ChangeKind_t kind = ChangeKind_t::INVALID;
   SequenceNumber_t sequenceNumber = SEQUENCENUMBER_UNKNOWN;
@@ -41,7 +42,7 @@ struct CacheChange {
 
   CacheChange() = default;
   CacheChange(ChangeKind_t kind, SequenceNumber_t sequenceNumber)
-      : kind(kind), sequenceNumber(sequenceNumber){};
+    : kind(kind), sequenceNumber(sequenceNumber) {};
 };
 } // namespace rtps
 

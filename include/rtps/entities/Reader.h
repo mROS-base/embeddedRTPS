@@ -33,11 +33,13 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/storages/PBufWrapper.h"
 #include <cstring>
 
-namespace rtps {
+namespace rtps
+{
 
 struct SubmessageHeartbeat;
 
-class ReaderCacheChange {
+class ReaderCacheChange
+{
 private:
   const uint8_t *data;
 
@@ -49,10 +51,10 @@ public:
 
   ReaderCacheChange(ChangeKind_t kind, Guid_t &writerGuid, SequenceNumber_t sn,
                     const uint8_t *data, DataSize_t size)
-      : data(data), kind(kind), size(size), writerGuid(writerGuid), sn(sn){};
+    : data(data), kind(kind), size(size), writerGuid(writerGuid), sn(sn) {};
 
   ~ReaderCacheChange() =
-      default; // No need to free data. It's not owned by this object
+    default; // No need to free data. It's not owned by this object
   // Not allowed because this class doesn't own the ptr and the user isn't
   // allowed to use it outside the Scope of the callback
   ReaderCacheChange(const ReaderCacheChange &other) = delete;
@@ -60,7 +62,8 @@ public:
   ReaderCacheChange &operator=(const ReaderCacheChange &other) = delete;
   ReaderCacheChange &operator=(ReaderCacheChange &&other) = delete;
 
-  bool copyInto(uint8_t *buffer, DataSize_t destSize) const {
+  bool copyInto(uint8_t *buffer, DataSize_t destSize) const
+  {
     if (destSize < size) {
       return false;
     } else {
@@ -69,15 +72,22 @@ public:
     }
   }
 
-  const uint8_t *getData() const { return data; }
+  const uint8_t *getData() const
+  {
+    return data;
+  }
 
-  const DataSize_t getDataSize() const { return size; }
+  const DataSize_t getDataSize() const
+  {
+    return size;
+  }
 };
 
 typedef void (*ddsReaderCallback_fp)(void *callee,
                                      const ReaderCacheChange &cacheChange);
 
-class Reader {
+class Reader
+{
 public:
   TopicData m_attributes;
   virtual void newChange(const ReaderCacheChange &cacheChange) = 0;
@@ -87,9 +97,13 @@ public:
   virtual bool addNewMatchedWriter(const WriterProxy &newProxy) = 0;
   virtual void removeWriter(const Guid_t &guid) = 0;
   virtual void removeWriterOfParticipant(const GuidPrefix_t &guidPrefix) = 0;
-  bool isInitialized() { return m_is_initialized_; }
+  bool isInitialized()
+  {
+    return m_is_initialized_;
+  }
 
-  bool knowWriterId(const Guid_t &guid) {
+  bool knowWriterId(const Guid_t &guid)
+  {
     for (const auto &proxy : m_proxies) {
       if (proxy.remoteWriterGuid.operator==(guid)) {
         return true;
@@ -98,7 +112,10 @@ public:
     return false;
   }
 
-  uint32_t getNumMatchedWriters() { return m_proxies.getSize(); }
+  uint32_t getNumMatchedWriters()
+  {
+    return m_proxies.getSize();
+  }
 
 protected:
   bool m_is_initialized_ = false;

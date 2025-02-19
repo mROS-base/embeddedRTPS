@@ -28,7 +28,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/config.h"
 #include "rtps/storages/CacheChange.h"
 
-namespace rtps {
+namespace rtps
+{
 
 /**
  * Simple version of a history cache. It sets consecutive sequence numbers
@@ -37,18 +38,21 @@ namespace rtps {
  * However, this is in principle easy to add by changing the ChangeKind and
  * dropping it when passing it during deleting of other sequence numbers
  */
-template <uint16_t SIZE> class SimpleHistoryCache {
+template <uint16_t SIZE> class SimpleHistoryCache
+{
 public:
   SimpleHistoryCache() = default;
 
-  bool isFull() const {
+  bool isFull() const
+  {
     uint16_t it = m_head;
     incrementIterator(it);
     return it == m_tail;
   }
 
   const CacheChange *addChange(CacheChange::SerializerCallback func,
-                              FragDataSize_t size) {
+                               FragDataSize_t size)
+  {
     CacheChange change;
     change.kind = ChangeKind_t::ALIVE;
     change.sizeToBeSerialized = size;
@@ -62,7 +66,8 @@ public:
     return place;
   }
 
-  const CacheChange *addChange(const uint8_t *data, DataSize_t size) {
+  const CacheChange *addChange(const uint8_t *data, DataSize_t size)
+  {
     CacheChange change;
     change.kind = ChangeKind_t::ALIVE;
     change.data.reserve(size);
@@ -76,7 +81,8 @@ public:
     return place;
   }
 
-  void removeUntilIncl(SequenceNumber_t sn) {
+  void removeUntilIncl(SequenceNumber_t sn)
+  {
     if (m_head == m_tail) {
       return;
     }
@@ -91,9 +97,13 @@ public:
     }
   }
 
-  void dropOldest() { removeUntilIncl(getSeqNumMin()); }
+  void dropOldest()
+  {
+    removeUntilIncl(getSeqNumMin());
+  }
 
-  const CacheChange *getChangeBySN(SequenceNumber_t sn) const {
+  const CacheChange *getChangeBySN(SequenceNumber_t sn) const
+  {
     SequenceNumber_t minSN = getSeqNumMin();
     if (sn < minSN || getSeqNumMax() < sn) {
       return nullptr;
@@ -112,7 +122,8 @@ public:
     return &m_buffer[pos];
   }
 
-  const SequenceNumber_t &getSeqNumMin() const {
+  const SequenceNumber_t &getSeqNumMin() const
+  {
     if (m_head == m_tail) {
       return SEQUENCENUMBER_UNKNOWN;
     } else {
@@ -120,7 +131,8 @@ public:
     }
   }
 
-  const SequenceNumber_t &getSeqNumMax() const {
+  const SequenceNumber_t &getSeqNumMax() const
+  {
     if (m_head == m_tail) {
       return SEQUENCENUMBER_UNKNOWN;
     } else {
@@ -137,7 +149,8 @@ private:
 
   SequenceNumber_t m_lastUsedSequenceNumber{0, 0};
 
-  inline void incrementHead() {
+  inline void incrementHead()
+  {
     incrementIterator(m_head);
     if (m_head == m_tail) {
       // Move without check
@@ -145,14 +158,16 @@ private:
     }
   }
 
-  inline void incrementIterator(uint16_t &iterator) const {
+  inline void incrementIterator(uint16_t &iterator) const
+  {
     ++iterator;
     if (iterator >= m_buffer.size()) {
       iterator = 0;
     }
   }
 
-  inline void incrementTail() {
+  inline void incrementTail()
+  {
     if (m_head != m_tail) {
       incrementIterator(m_tail);
     }
@@ -161,7 +176,8 @@ private:
 protected:
   // This constructor was created for unit testing
   explicit SimpleHistoryCache(SequenceNumber_t lastUsed)
-      : SimpleHistoryCache() {
+    : SimpleHistoryCache()
+  {
     m_lastUsedSequenceNumber = lastUsed;
   }
 };

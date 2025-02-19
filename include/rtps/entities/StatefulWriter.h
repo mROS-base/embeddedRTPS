@@ -30,9 +30,11 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/storages/MemoryPool.h"
 #include "rtps/storages/SimpleHistoryCache.h"
 
-namespace rtps {
+namespace rtps
+{
 
-template <class NetworkDriver> class StatefulWriterT final : public Writer {
+template <class NetworkDriver> class StatefulWriterT final : public Writer
+{
 public:
   ~StatefulWriterT() override;
   bool init(TopicData attributes, TopicKind_t topicKind, ThreadPool *threadPool,
@@ -47,7 +49,7 @@ public:
   const CacheChange *newChange(ChangeKind_t kind, const uint8_t *data,
                                DataSize_t size) override;
   const CacheChange *newChangeCallback(ChangeKind_t kind,
-				       CacheChange::SerializerCallback func, FragDataSize_t size) override;
+                                       CacheChange::SerializerCallback func, FragDataSize_t size) override;
   void setAllChangesToUnsent() override;
   void onNewAckNack(const SubmessageAckNack &msg,
                     const GuidPrefix_t &sourceGuidPrefix) override;

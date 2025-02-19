@@ -34,9 +34,11 @@ Author: i11 - Embedded Software, RWTH Aachen University
 
 #include <array>
 
-namespace rtps {
+namespace rtps
+{
 
-class UdpDriver {
+class UdpDriver
+{
 
 public:
   typedef void (*udpRxFunc_fp)(void *arg, udp_pcb *pcb, pbuf *p,

@@ -28,7 +28,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/common/types.h"
 #include <rtps/common/Locator.h>
 
-namespace rtps {
+namespace rtps
+{
 struct WriterProxy {
   Guid_t remoteWriterGuid;
   SequenceNumber_t expectedSN;
@@ -39,14 +40,15 @@ struct WriterProxy {
   WriterProxy() = default;
 
   WriterProxy(const Guid_t &guid, const LocatorIPv4 &loc)
-      : remoteWriterGuid(guid),
-        expectedSN(SequenceNumber_t{0, 1}), ackNackCount{1}, hbCount{0},
-        remoteLocator(loc) {}
+    : remoteWriterGuid(guid),
+      expectedSN(SequenceNumber_t{0, 1}), ackNackCount{1}, hbCount{0},
+      remoteLocator(loc) {}
 
   // For now, we don't store any packets, so we just request all starting from
   // the next expected
   SequenceNumberSet getMissing(const SequenceNumber_t & /*firstAvail*/,
-                               const SequenceNumber_t &lastAvail) {
+                               const SequenceNumber_t &lastAvail)
+  {
     SequenceNumberSet set;
     if (lastAvail < expectedSN) {
       set.base = expectedSN;
@@ -60,7 +62,8 @@ struct WriterProxy {
     return set;
   }
 
-  Count_t getNextAckNackCount() {
+  Count_t getNextAckNackCount()
+  {
     const Count_t tmp = ackNackCount;
     ++ackNackCount.value;
     return tmp;

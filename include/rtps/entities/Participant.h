@@ -31,12 +31,14 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/discovery/SPDPAgent.h"
 #include "rtps/messages/MessageReceiver.h"
 
-namespace rtps {
+namespace rtps
+{
 
 class Writer;
 class Reader;
 
-class Participant {
+class Participant
+{
 public:
   GuidPrefix_t m_guidPrefix;
   ParticipantId_t m_participantId;
@@ -61,9 +63,9 @@ public:
 
   // Actually the only two function that should be used by the user
   bool registerOnNewPublisherMatchedCallback(void (*callback)(void *arg),
-                                             void *args);
+      void *args);
   bool registerOnNewSubscriberMatchedCallback(void (*callback)(void *arg),
-                                              void *args);
+      void *args);
 
   //! Not-thread-safe function to add a writer
   Writer *addWriter(Writer *writer);
@@ -113,7 +115,7 @@ private:
 
   sys_mutex_t m_mutex;
   MemoryPool<ParticipantProxyData, Config::SPDP_MAX_NUMBER_FOUND_PARTICIPANTS>
-      m_remoteParticipants;
+  m_remoteParticipants;
 
   SPDPAgent m_spdpAgent;
   SEDPAgent m_sedpAgent;

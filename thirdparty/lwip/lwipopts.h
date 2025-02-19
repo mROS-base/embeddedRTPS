@@ -313,7 +313,7 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* The following defines must be done even in OPTTEST mode: */
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 #if !defined(NO_SYS) || !NO_SYS /* default is 0 */

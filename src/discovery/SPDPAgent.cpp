@@ -36,13 +36,15 @@ using rtps::SPDPAgent;
 using rtps::SMElement::BuildInEndpointSet;
 using rtps::SMElement::ParameterId;
 
-SPDPAgent::~SPDPAgent() {
+SPDPAgent::~SPDPAgent()
+{
   if (initialized) {
     sys_mutex_free(&m_mutex);
   }
 }
 
-void SPDPAgent::init(Participant &participant, BuiltInEndpoints &endpoints) {
+void SPDPAgent::init(Participant &participant, BuiltInEndpoints &endpoints)
+{
   if (sys_mutex_new(&m_mutex) != ERR_OK) {
     SPDP_LOG("Could not alloc mutex");
     return;
@@ -58,7 +60,8 @@ void SPDPAgent::init(Participant &participant, BuiltInEndpoints &endpoints) {
   initialized = true;
 }
 
-void SPDPAgent::start() {
+void SPDPAgent::start()
+{
   if (m_running) {
     return;
   }
@@ -67,13 +70,17 @@ void SPDPAgent::start() {
                  Config::SPDP_WRITER_STACKSIZE, Config::SPDP_WRITER_PRIO);
 }
 
-void SPDPAgent::stop() { m_running = false; }
+void SPDPAgent::stop()
+{
+  m_running = false;
+}
 
-void SPDPAgent::runBroadcast(void *args) {
+void SPDPAgent::runBroadcast(void *args)
+{
   SPDPAgent &agent = *static_cast<SPDPAgent *>(args);
   const DataSize_t size = ucdr_buffer_length(&agent.m_microbuffer);
   agent.m_buildInEndpoints.spdpWriter->newChange(
-      ChangeKind_t::ALIVE, agent.m_microbuffer.init, size);
+    ChangeKind_t::ALIVE, agent.m_microbuffer.init, size);
   while (agent.m_running) {
 #ifdef OS_IS_FREERTOS
     vTaskDelay(pdMS_TO_TICKS(Config::SPDP_RESEND_PERIOD_MS));
@@ -91,12 +98,14 @@ void SPDPAgent::runBroadcast(void *args) {
 }
 
 void SPDPAgent::receiveCallback(void *callee,
-                                const ReaderCacheChange &cacheChange) {
+                                const ReaderCacheChange &cacheChange)
+{
   auto agent = static_cast<SPDPAgent *>(callee);
   agent->handleSPDPPackage(cacheChange);
 }
 
-void SPDPAgent::handleSPDPPackage(const ReaderCacheChange &cacheChange) {
+void SPDPAgent::handleSPDPPackage(const ReaderCacheChange &cacheChange)
+{
   if (!initialized) {
     SPDP_LOG("Callback called without initialization\n");
     return;
@@ -119,7 +128,7 @@ void SPDPAgent::handleSPDPPackage(const ReaderCacheChange &cacheChange) {
   if (cacheChange.kind == ChangeKind_t::ALIVE) {
     configureEndianessAndOptions(buffer);
     volatile bool success =
-        m_proxyDataBuffer.readFromUcdrBuffer(buffer, mp_participant);
+      m_proxyDataBuffer.readFromUcdrBuffer(buffer, mp_participant);
     if (success) {
       // TODO In case we store the history we can free the history mutex here
       processProxyData();
@@ -131,7 +140,8 @@ void SPDPAgent::handleSPDPPackage(const ReaderCacheChange &cacheChange) {
   }
 }
 
-void SPDPAgent::configureEndianessAndOptions(ucdrBuffer &buffer) {
+void SPDPAgent::configureEndianessAndOptions(ucdrBuffer &buffer)
+{
   std::array<uint8_t, 2> encapsulation{};
   // Endianess doesn't matter for this since those are single bytes
   ucdr_deserialize_array_uint8_t(&buffer, encapsulation.data(),
@@ -146,19 +156,20 @@ void SPDPAgent::configureEndianessAndOptions(ucdrBuffer &buffer) {
                                  encapsulation.size());
 }
 
-void SPDPAgent::processProxyData() {
+void SPDPAgent::processProxyData()
+{
   if (m_proxyDataBuffer.m_guid.prefix.id == mp_participant->m_guidPrefix.id) {
     return; // Our own packet
   }
 
   const rtps::ParticipantProxyData *remote_part;
   remote_part =
-      mp_participant->findRemoteParticipant(m_proxyDataBuffer.m_guid.prefix);
+    mp_participant->findRemoteParticipant(m_proxyDataBuffer.m_guid.prefix);
   if (remote_part != nullptr) {
     SPDP_LOG("Not adding remote participant guid.prefix = %u \n",
              (unsigned int)Guid_t::sum(remote_part->m_guid));
     mp_participant->refreshRemoteParticipantLiveliness(
-        m_proxyDataBuffer.m_guid.prefix);
+      m_proxyDataBuffer.m_guid.prefix);
     return; // Already in our list
   }
 
@@ -172,7 +183,8 @@ void SPDPAgent::processProxyData() {
     SPDP_LOG("Failed to add new participant");
   }
 #else
-  } else {
+  } else
+  {
     while (1) {
       SPDP_LOG("failed to add remote participant");
     }
@@ -180,7 +192,8 @@ void SPDPAgent::processProxyData() {
 #endif
 }
 
-bool SPDPAgent::addProxiesForBuiltInEndpoints() {
+bool SPDPAgent::addProxiesForBuiltInEndpoints()
+{
 
   LocatorIPv4 *locator = nullptr;
 
@@ -203,37 +216,46 @@ bool SPDPAgent::addProxiesForBuiltInEndpoints() {
   SPDP_LOG("Adding IPv4 Locator %s\n", addr);
 
   if (m_proxyDataBuffer.hasPublicationWriter()) {
-    const WriterProxy proxy{{m_proxyDataBuffer.m_guid.prefix,
-                             ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER},
-                            *locator};
+    const WriterProxy proxy{{
+        m_proxyDataBuffer.m_guid.prefix,
+        ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER
+      },
+      *locator};
     m_buildInEndpoints.sedpPubReader->addNewMatchedWriter(proxy);
   }
 
   if (m_proxyDataBuffer.hasSubscriptionWriter()) {
-    const WriterProxy proxy{{m_proxyDataBuffer.m_guid.prefix,
-                             ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER},
-                            *locator};
+    const WriterProxy proxy{{
+        m_proxyDataBuffer.m_guid.prefix,
+        ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER
+      },
+      *locator};
     m_buildInEndpoints.sedpSubReader->addNewMatchedWriter(proxy);
   }
 
   if (m_proxyDataBuffer.hasPublicationReader()) {
-    const ReaderProxy proxy{{m_proxyDataBuffer.m_guid.prefix,
-                             ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER},
-                            *locator};
+    const ReaderProxy proxy{{
+        m_proxyDataBuffer.m_guid.prefix,
+        ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER
+      },
+      *locator};
     m_buildInEndpoints.sedpPubWriter->addNewMatchedReader(proxy);
   }
 
   if (m_proxyDataBuffer.hasSubscriptionReader()) {
-    const ReaderProxy proxy{{m_proxyDataBuffer.m_guid.prefix,
-                             ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER},
-                            *locator};
+    const ReaderProxy proxy{{
+        m_proxyDataBuffer.m_guid.prefix,
+        ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER
+      },
+      *locator};
     m_buildInEndpoints.sedpSubWriter->addNewMatchedReader(proxy);
   }
 
   return true;
 }
 
-void SPDPAgent::addInlineQos() {
+void SPDPAgent::addInlineQos()
+{
   ucdr_serialize_uint16_t(&m_microbuffer, ParameterId::PID_KEY_HASH);
   ucdr_serialize_uint16_t(&m_microbuffer, 16);
   ucdr_serialize_array_uint8_t(&m_microbuffer,
@@ -243,36 +265,38 @@ void SPDPAgent::addInlineQos() {
                                ENTITYID_BUILD_IN_PARTICIPANT.entityKey.data(),
                                sizeof(EntityId_t::entityKey));
   ucdr_serialize_uint8_t(
-      &m_microbuffer,
-      static_cast<uint8_t>(ENTITYID_BUILD_IN_PARTICIPANT.entityKind));
+    &m_microbuffer,
+    static_cast<uint8_t>(ENTITYID_BUILD_IN_PARTICIPANT.entityKind));
 
   endCurrentList();
 }
 
-void SPDPAgent::endCurrentList() {
+void SPDPAgent::endCurrentList()
+{
   ucdr_serialize_uint16_t(&m_microbuffer, ParameterId::PID_SENTINEL);
   ucdr_serialize_uint16_t(&m_microbuffer, 0);
 }
 
-void SPDPAgent::addParticipantParameters() {
+void SPDPAgent::addParticipantParameters()
+{
   const uint16_t zero_options = 0;
   const uint16_t protocolVersionSize =
-      sizeof(PROTOCOLVERSION.major) + sizeof(PROTOCOLVERSION.minor);
+    sizeof(PROTOCOLVERSION.major) + sizeof(PROTOCOLVERSION.minor);
   const uint16_t vendorIdSize = Config::VENDOR_ID.vendorId.size();
   const uint16_t locatorSize = sizeof(FullLengthLocator);
   const uint16_t durationSize =
-      sizeof(Duration_t::seconds) + sizeof(Duration_t::fraction);
+    sizeof(Duration_t::seconds) + sizeof(Duration_t::fraction);
   const uint16_t entityKeySize = 3;
   const uint16_t entityKindSize = 1;
   const uint16_t entityIdSize = entityKeySize + entityKindSize;
   const uint16_t guidSize = sizeof(GuidPrefix_t::id) + entityIdSize;
 
   const FullLengthLocator userUniCastLocator =
-      getUserUnicastLocator(mp_participant->m_participantId);
+    getUserUnicastLocator(mp_participant->m_participantId);
   const FullLengthLocator builtInUniCastLocator =
-      getBuiltInUnicastLocator(mp_participant->m_participantId);
+    getBuiltInUnicastLocator(mp_participant->m_participantId);
   const FullLengthLocator builtInMultiCastLocator =
-      getBuiltInMulticastLocator();
+    getBuiltInMulticastLocator();
 
   ucdr_serialize_array_uint8_t(&m_microbuffer,
                                rtps::SMElement::SCHEME_PL_CDR_LE.data(),
@@ -297,22 +321,22 @@ void SPDPAgent::addParticipantParameters() {
                           ParameterId::PID_DEFAULT_UNICAST_LOCATOR);
   ucdr_serialize_uint16_t(&m_microbuffer, locatorSize);
   ucdr_serialize_array_uint8_t(
-      &m_microbuffer, reinterpret_cast<const uint8_t *>(&userUniCastLocator),
-      locatorSize);
+    &m_microbuffer, reinterpret_cast<const uint8_t *>(&userUniCastLocator),
+    locatorSize);
 
   ucdr_serialize_uint16_t(&m_microbuffer,
                           ParameterId::PID_METATRAFFIC_UNICAST_LOCATOR);
   ucdr_serialize_uint16_t(&m_microbuffer, locatorSize);
   ucdr_serialize_array_uint8_t(
-      &m_microbuffer, reinterpret_cast<const uint8_t *>(&builtInUniCastLocator),
-      locatorSize);
+    &m_microbuffer, reinterpret_cast<const uint8_t *>(&builtInUniCastLocator),
+    locatorSize);
 
   ucdr_serialize_uint16_t(&m_microbuffer,
                           ParameterId::PID_METATRAFFIC_MULTICAST_LOCATOR);
   ucdr_serialize_uint16_t(&m_microbuffer, locatorSize);
   ucdr_serialize_array_uint8_t(
-      &m_microbuffer,
-      reinterpret_cast<const uint8_t *>(&builtInMultiCastLocator), locatorSize);
+    &m_microbuffer,
+    reinterpret_cast<const uint8_t *>(&builtInMultiCastLocator), locatorSize);
 
   ucdr_serialize_uint16_t(&m_microbuffer,
                           ParameterId::PID_PARTICIPANT_LEASE_DURATION);
@@ -331,19 +355,19 @@ void SPDPAgent::addParticipantParameters() {
                                ENTITYID_BUILD_IN_PARTICIPANT.entityKey.data(),
                                entityKeySize);
   ucdr_serialize_uint8_t(
-      &m_microbuffer,
-      static_cast<uint8_t>(ENTITYID_BUILD_IN_PARTICIPANT.entityKind));
+    &m_microbuffer,
+    static_cast<uint8_t>(ENTITYID_BUILD_IN_PARTICIPANT.entityKind));
 
   ucdr_serialize_uint16_t(&m_microbuffer,
                           ParameterId::PID_BUILTIN_ENDPOINT_SET);
   ucdr_serialize_uint16_t(&m_microbuffer, sizeof(BuildInEndpointSet));
   ucdr_serialize_uint32_t(
-      &m_microbuffer, BuildInEndpointSet::DISC_BIE_PARTICIPANT_ANNOUNCER |
-                          BuildInEndpointSet::DISC_BIE_PARTICIPANT_DETECTOR |
-                          BuildInEndpointSet::DISC_BIE_PUBLICATION_ANNOUNCER |
-                          BuildInEndpointSet::DISC_BIE_PUBLICATION_DETECTOR |
-                          BuildInEndpointSet::DISC_BIE_SUBSCRIPTION_ANNOUNCER |
-                          BuildInEndpointSet::DISC_BIE_SUBSCRIPTION_DETECTOR);
+    &m_microbuffer, BuildInEndpointSet::DISC_BIE_PARTICIPANT_ANNOUNCER |
+    BuildInEndpointSet::DISC_BIE_PARTICIPANT_DETECTOR |
+    BuildInEndpointSet::DISC_BIE_PUBLICATION_ANNOUNCER |
+    BuildInEndpointSet::DISC_BIE_PUBLICATION_DETECTOR |
+    BuildInEndpointSet::DISC_BIE_SUBSCRIPTION_ANNOUNCER |
+    BuildInEndpointSet::DISC_BIE_SUBSCRIPTION_DETECTOR);
 
   endCurrentList();
 }

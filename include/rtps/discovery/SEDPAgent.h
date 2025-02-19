@@ -28,22 +28,24 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/discovery/BuiltInEndpoints.h"
 #include "rtps/discovery/TopicData.h"
 
-namespace rtps {
+namespace rtps
+{
 
 class Participant;
 class ReaderCacheChange;
 class Writer;
 class Reader;
 
-class SEDPAgent {
+class SEDPAgent
+{
 public:
   void init(Participant &part, const BuiltInEndpoints &endpoints);
   void addWriter(Writer &writer);
   void addReader(Reader &reader);
   void registerOnNewPublisherMatchedCallback(void (*callback)(void *arg),
-                                             void *args);
+      void *args);
   void registerOnNewSubscriberMatchedCallback(void (*callback)(void *arg),
-                                              void *args);
+      void *args);
   void removeUnmatchedEntitiesOfParticipant(const GuidPrefix_t &guidPrefix);
   uint32_t getNumRemoteUnmatchedReaders();
   uint32_t getNumRemoteUnmatchedWriters();
@@ -56,7 +58,7 @@ private:
   Participant *m_part;
   sys_mutex_t m_mutex;
   uint8_t m_buffer[600]; // TODO check size, currently changed from 300 to 600
-                         // (FastDDS gives too many options)
+  // (FastDDS gives too many options)
   BuiltInEndpoints m_endpoints;
   /*
    * If we add readers later on, remote participants will not send matching
@@ -65,10 +67,10 @@ private:
    * type are represented as hash values to save memory.
    */
   MemoryPool<TopicDataCompressed, Config::MAX_NUM_UNMATCHED_REMOTE_WRITERS>
-      m_unmatchedRemoteWriters;
+  m_unmatchedRemoteWriters;
   size_t m_numUnmatchedRemoteWriters = 0;
   MemoryPool<TopicDataCompressed, Config::MAX_NUM_UNMATCHED_REMOTE_READERS>
-      m_unmatchedRemoteReaders;
+  m_unmatchedRemoteReaders;
   size_t m_numMatchedRemoteReaders = 0;
 
   void tryMatchUnmatchedEndpoints();

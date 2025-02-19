@@ -28,13 +28,15 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include <stdio.h>
 using namespace rtps;
 
-void doCopyAndMoveOn(uint8_t *dst, const uint8_t *&src, size_t size) {
+void doCopyAndMoveOn(uint8_t *dst, const uint8_t *&src, size_t size)
+{
   memcpy(dst, src, size);
   src += size;
 }
 
 bool rtps::deserializeMessage(const MessageProcessingInfo &info,
-                              Header &header) {
+                              Header &header)
+{
   if (info.getRemainingSize() < Header::getRawSize()) {
     return false;
   }
@@ -52,7 +54,8 @@ bool rtps::deserializeMessage(const MessageProcessingInfo &info,
 }
 
 bool rtps::deserializeMessage(const MessageProcessingInfo &info,
-                              SubmessageHeader &header) {
+                              SubmessageHeader &header)
+{
   if (info.getRemainingSize() < SubmessageHeader::getRawSize()) {
     return false;
   }
@@ -66,7 +69,8 @@ bool rtps::deserializeMessage(const MessageProcessingInfo &info,
 }
 
 bool rtps::deserializeMessage(const MessageProcessingInfo &info,
-                              SubmessageData &msg) {
+                              SubmessageData &msg)
+{
   if (info.getRemainingSize() < SubmessageHeader::getRawSize()) {
     return false;
   }
@@ -81,7 +85,7 @@ bool rtps::deserializeMessage(const MessageProcessingInfo &info,
   }
 
   const uint8_t *currentPos =
-      info.getPointerToCurrentPos() + SubmessageHeader::getRawSize();
+    info.getPointerToCurrentPos() + SubmessageHeader::getRawSize();
 
   doCopyAndMoveOn(reinterpret_cast<uint8_t *>(&msg.extraFlags), currentPos,
                   sizeof(uint16_t));
@@ -101,7 +105,8 @@ bool rtps::deserializeMessage(const MessageProcessingInfo &info,
 }
 
 bool rtps::deserializeMessage(const MessageProcessingInfo &info,
-                              SubmessageHeartbeat &msg) {
+                              SubmessageHeartbeat &msg)
+{
   if (info.getRemainingSize() < SubmessageHeartbeat::getRawSize()) {
     return false;
   }
@@ -110,7 +115,7 @@ bool rtps::deserializeMessage(const MessageProcessingInfo &info,
   }
 
   const uint8_t *currentPos =
-      info.getPointerToCurrentPos() + SubmessageHeader::getRawSize();
+    info.getPointerToCurrentPos() + SubmessageHeader::getRawSize();
 
   doCopyAndMoveOn(msg.readerId.entityKey.data(), currentPos,
                   msg.readerId.entityKey.size());
@@ -132,11 +137,12 @@ bool rtps::deserializeMessage(const MessageProcessingInfo &info,
 }
 
 bool rtps::deserializeMessage(const MessageProcessingInfo &info,
-                              SubmessageAckNack &msg) {
+                              SubmessageAckNack &msg)
+{
   const DataSize_t remainingSizeAtBeginning = info.getRemainingSize();
   if (remainingSizeAtBeginning <
       SubmessageAckNack::
-          getRawSizeWithoutSNSet()) { // Size of SequenceNumberSet unknown
+      getRawSizeWithoutSNSet()) { // Size of SequenceNumberSet unknown
     return false;
   }
   if (!deserializeMessage(info, msg.header)) {
@@ -144,7 +150,7 @@ bool rtps::deserializeMessage(const MessageProcessingInfo &info,
   }
 
   const uint8_t *currentPos =
-      info.getPointerToCurrentPos() + SubmessageHeader::getRawSize();
+    info.getPointerToCurrentPos() + SubmessageHeader::getRawSize();
 
   doCopyAndMoveOn(msg.readerId.entityKey.data(), currentPos,
                   msg.readerId.entityKey.size());
@@ -167,8 +173,8 @@ bool rtps::deserializeMessage(const MessageProcessingInfo &info,
 
   if (msg.readerSNState.numBits != 0) {
     doCopyAndMoveOn(
-        reinterpret_cast<uint8_t *>(msg.readerSNState.bitMap.data()),
-        currentPos, 4 * ((msg.readerSNState.numBits / 32) + 1));
+      reinterpret_cast<uint8_t *>(msg.readerSNState.bitMap.data()),
+      currentPos, 4 * ((msg.readerSNState.numBits / 32) + 1));
   }
   doCopyAndMoveOn(reinterpret_cast<uint8_t *>(&msg.count.value), currentPos,
                   sizeof(msg.count.value));

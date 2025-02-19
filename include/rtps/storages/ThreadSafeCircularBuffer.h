@@ -30,9 +30,11 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include <array>
 #include <limits>
 
-namespace rtps {
+namespace rtps
+{
 
-template <typename T, uint16_t SIZE> class ThreadSafeCircularBuffer {
+template <typename T, uint16_t SIZE> class ThreadSafeCircularBuffer
+{
 
 public:
   bool init();

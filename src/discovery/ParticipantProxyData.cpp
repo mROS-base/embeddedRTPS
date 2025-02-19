@@ -30,7 +30,8 @@ using rtps::ParticipantProxyData;
 
 ParticipantProxyData::ParticipantProxyData(Guid_t guid) : m_guid(guid) {}
 
-void ParticipantProxyData::reset() {
+void ParticipantProxyData::reset()
+{
   m_guid = Guid_t{GUIDPREFIX_UNKNOWN, ENTITYID_UNKNOWN};
   m_manualLivelinessCount = Count_t{1};
   m_expectsInlineQos = false;
@@ -43,7 +44,8 @@ void ParticipantProxyData::reset() {
 }
 
 bool ParticipantProxyData::readFromUcdrBuffer(ucdrBuffer &buffer,
-                                              Participant *participant) {
+    Participant *participant)
+{
   reset();
   SMElement::ParameterId pid;
   uint16_t length;
@@ -86,7 +88,7 @@ bool ParticipantProxyData::readFromUcdrBuffer(ucdrBuffer &buffer,
       ucdr_deserialize_array_uint8_t(&buffer, m_guid.entityId.entityKey.data(),
                                      m_guid.entityId.entityKey.size());
       ucdr_deserialize_uint8_t(
-          &buffer, reinterpret_cast<uint8_t *>(&m_guid.entityId.entityKind));
+        &buffer, reinterpret_cast<uint8_t *>(&m_guid.entityId.entityKind));
       if (participant->findRemoteParticipant(m_guid.prefix)) {
         SPDP_LOG("stopping deserialization early, participant is known\n");
         return true;
@@ -152,7 +154,9 @@ bool ParticipantProxyData::readFromUcdrBuffer(ucdrBuffer &buffer,
     case ParameterId::PID_SENTINEL: {
       return true;
     }
-    default: { return false; }
+    default: {
+      return false;
+    }
     }
     // Parameter lists are 4-byte aligned
     uint32_t alignment = ucdr_buffer_alignment(&buffer, 4);
@@ -163,8 +167,9 @@ bool ParticipantProxyData::readFromUcdrBuffer(ucdrBuffer &buffer,
 }
 
 bool ParticipantProxyData::readLocatorIntoList(
-    ucdrBuffer &buffer,
-    std::array<LocatorIPv4, Config::SPDP_MAX_NUM_LOCATORS> &list) {
+  ucdrBuffer &buffer,
+  std::array<LocatorIPv4, Config::SPDP_MAX_NUM_LOCATORS> &list)
+{
   int valid_locators = 0;
   FullLengthLocator full_length_locator;
   for (auto &proxy_locator : list) {

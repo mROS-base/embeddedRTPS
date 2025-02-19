@@ -29,12 +29,14 @@ using rtps::TopicData;
 using rtps::TopicDataCompressed;
 using rtps::SMElement::ParameterId;
 
-bool TopicData::matchesTopicOf(const TopicData &other) {
+bool TopicData::matchesTopicOf(const TopicData &other)
+{
   return strcmp(this->topicName, other.topicName) == 0 &&
          strcmp(this->typeName, other.typeName) == 0;
 }
 
-bool TopicData::readFromUcdrBuffer(ucdrBuffer &buffer) {
+bool TopicData::readFromUcdrBuffer(ucdrBuffer &buffer)
+{
 
   while (ucdr_buffer_remaining(&buffer) >= 4) {
     ParameterId pid;
@@ -55,7 +57,7 @@ bool TopicData::readFromUcdrBuffer(ucdrBuffer &buffer) {
                                      endpointGuid.entityId.entityKey.data(),
                                      endpointGuid.entityId.entityKey.size());
       ucdr_deserialize_uint8_t(&buffer, reinterpret_cast<uint8_t *>(
-                                            &endpointGuid.entityId.entityKind));
+                                 &endpointGuid.entityId.entityKind));
       break;
     case ParameterId::PID_RELIABILITY:
       ucdr_deserialize_uint32_t(&buffer,
@@ -97,7 +99,8 @@ bool TopicData::readFromUcdrBuffer(ucdrBuffer &buffer) {
   return ucdr_buffer_remaining(&buffer) == 0;
 }
 
-bool TopicData::serializeIntoUcdrBuffer(ucdrBuffer &buffer) const {
+bool TopicData::serializeIntoUcdrBuffer(ucdrBuffer &buffer) const
+{
   // TODO Check if buffer length is sufficient
   const uint16_t guidSize = sizeof(GuidPrefix_t::id) + 4;
 
@@ -107,8 +110,8 @@ bool TopicData::serializeIntoUcdrBuffer(ucdrBuffer &buffer) const {
     ucdr_serialize_uint16_t(&buffer, ParameterId::PID_UNICAST_LOCATOR);
     ucdr_serialize_uint16_t(&buffer, sizeof(FullLengthLocator));
     ucdr_serialize_array_uint8_t(
-        &buffer, reinterpret_cast<const uint8_t *>(&unicastLocator),
-        sizeof(FullLengthLocator));
+      &buffer, reinterpret_cast<const uint8_t *>(&unicastLocator),
+      sizeof(FullLengthLocator));
 #if SUPPRESS_UNICAST
   }
 #endif
@@ -117,13 +120,13 @@ bool TopicData::serializeIntoUcdrBuffer(ucdrBuffer &buffer) const {
     ucdr_serialize_uint16_t(&buffer, ParameterId::PID_MULTICAST_LOCATOR);
     ucdr_serialize_uint16_t(&buffer, sizeof(FullLengthLocator));
     ucdr_serialize_array_uint8_t(
-        &buffer, reinterpret_cast<const uint8_t *>(&multicastLocator),
-        sizeof(FullLengthLocator));
+      &buffer, reinterpret_cast<const uint8_t *>(&multicastLocator),
+      sizeof(FullLengthLocator));
   }
 
   // It's a 32 bit instead of 16 because it seems like the field is padded.
   const auto lenTopicName =
-      static_cast<uint32_t>(strlen(topicName) + 1); // + \0
+    static_cast<uint32_t>(strlen(topicName) + 1); // + \0
   uint16_t topicAlignment = 0;
   if (lenTopicName % 4 != 0) {
     topicAlignment = static_cast<uint8_t>(4 - (lenTopicName % 4));
@@ -143,7 +146,7 @@ bool TopicData::serializeIntoUcdrBuffer(ucdrBuffer &buffer) const {
     typeAlignment = static_cast<uint8_t>(4 - (lenTypeName % 4));
   }
   const auto totalLengthTypeNameField =
-      static_cast<uint16_t>(sizeof(lenTypeName) + lenTypeName + typeAlignment);
+    static_cast<uint16_t>(sizeof(lenTypeName) + lenTypeName + typeAlignment);
 
   ucdr_serialize_uint16_t(&buffer, ParameterId::PID_TYPE_NAME);
   ucdr_serialize_uint16_t(&buffer, totalLengthTypeNameField);
@@ -158,7 +161,7 @@ bool TopicData::serializeIntoUcdrBuffer(ucdrBuffer &buffer) const {
   ucdr_serialize_array_uint8_t(&buffer, endpointGuid.entityId.entityKey.data(),
                                endpointGuid.entityId.entityKey.size());
   ucdr_serialize_uint8_t(
-      &buffer, static_cast<uint8_t>(endpointGuid.entityId.entityKind));
+    &buffer, static_cast<uint8_t>(endpointGuid.entityId.entityKind));
 
   ucdr_serialize_uint16_t(&buffer, ParameterId::PID_ENDPOINT_GUID);
   ucdr_serialize_uint16_t(&buffer, guidSize);
@@ -167,7 +170,7 @@ bool TopicData::serializeIntoUcdrBuffer(ucdrBuffer &buffer) const {
   ucdr_serialize_array_uint8_t(&buffer, endpointGuid.entityId.entityKey.data(),
                                endpointGuid.entityId.entityKey.size());
   ucdr_serialize_uint8_t(
-      &buffer, static_cast<uint8_t>(endpointGuid.entityId.entityKind));
+    &buffer, static_cast<uint8_t>(endpointGuid.entityId.entityKind));
 
   const uint8_t unidentifiedOffset = 8;
   ucdr_serialize_uint16_t(&buffer, ParameterId::PID_RELIABILITY);
@@ -187,8 +190,9 @@ bool TopicData::serializeIntoUcdrBuffer(ucdrBuffer &buffer) const {
   return true;
 }
 
-bool TopicDataCompressed::matchesTopicOf(const TopicData &other) const {
+bool TopicDataCompressed::matchesTopicOf(const TopicData &other) const
+{
   return (hashCharArray(other.topicName, sizeof(other.topicName)) ==
-              topicHash &&
+          topicHash &&
           hashCharArray(other.typeName, sizeof(other.typeName)) == typeHash);
 }

@@ -33,14 +33,17 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include <array>
 #include <cstdint>
 
-namespace rtps {
-namespace MessageFactory {
+namespace rtps
+{
+namespace MessageFactory
+{
 const std::array<uint8_t, 4> PROTOCOL_TYPE{'R', 'T', 'P', 'S'};
 const uint8_t numBytesUntilEndOfLength =
-    4; // The first bytes incl. submessagelength don't count
+  4; // The first bytes incl. submessagelength don't count
 
 template <class Buffer>
-void addHeader(Buffer &buffer, const GuidPrefix_t &guidPrefix) {
+void addHeader(Buffer &buffer, const GuidPrefix_t &guidPrefix)
+{
 
   Header header;
   header.protocolName = PROTOCOL_TYPE;
@@ -52,7 +55,8 @@ void addHeader(Buffer &buffer, const GuidPrefix_t &guidPrefix) {
 }
 
 template <class Buffer>
-bool addSubMessageInfoDST(Buffer &buffer, GuidPrefix_t &dst) {
+bool addSubMessageInfoDST(Buffer &buffer, GuidPrefix_t &dst)
+{
   SubmessageInfoDST msg;
   msg.header.submessageId = SubmessageKind::INFO_DST;
 
@@ -69,7 +73,8 @@ bool addSubMessageInfoDST(Buffer &buffer, GuidPrefix_t &dst) {
 }
 
 template <class Buffer>
-void addSubMessageTimeStamp(Buffer &buffer, bool setInvalid = false) {
+void addSubMessageTimeStamp(Buffer &buffer, bool setInvalid = false)
+{
   SubmessageHeader header;
   header.submessageId = SubmessageKind::INFO_TS;
 
@@ -100,11 +105,12 @@ void addSubMessageTimeStamp(Buffer &buffer, bool setInvalid = false) {
 
 template <class Buffer>
 void addSubMessageDataFrag(Buffer &buffer, const Buffer &filledPayload,
-                       bool containsInlineQos, const SequenceNumber_t &SN,
-                       uint32_t fragStartingNumber,
-                       uint16_t fragSize,
-                       uint32_t sampleSize,
-                       const EntityId_t &writerID, const EntityId_t &readerID) {
+                           bool containsInlineQos, const SequenceNumber_t &SN,
+                           uint32_t fragStartingNumber,
+                           uint16_t fragSize,
+                           uint32_t sampleSize,
+                           const EntityId_t &writerID, const EntityId_t &readerID)
+{
   SubmessageDataFrag msg;
   msg.header.submessageId = SubmessageKind::DATA_FRAG;
 #if IS_LITTLE_ENDIAN
@@ -129,8 +135,8 @@ void addSubMessageDataFrag(Buffer &buffer, const Buffer &filledPayload,
   msg.sampleSize = sampleSize;
 
   constexpr uint16_t octetsToInlineQoS =
-         4  + 4    + 8              + 4              + 2                     + 2            + 4;
-      // EntityIds + SequenceNumber + FragmentNumber + fragmentsInSubmessage + fragmentSize + sampleSize
+    4  + 4    + 8              + 4              + 2                     + 2            + 4;
+  // EntityIds + SequenceNumber + FragmentNumber + fragmentsInSubmessage + fragmentSize + sampleSize
   msg.octetsToInlineQos = octetsToInlineQoS;
 
   serializeMessage(buffer, msg);
@@ -144,7 +150,8 @@ void addSubMessageDataFrag(Buffer &buffer, const Buffer &filledPayload,
 template <class Buffer>
 void addSubMessageData(Buffer &buffer, const Buffer &filledPayload,
                        bool containsInlineQos, const SequenceNumber_t &SN,
-                       const EntityId_t &writerID, const EntityId_t &readerID) {
+                       const EntityId_t &writerID, const EntityId_t &readerID)
+{
   SubmessageData msg;
   msg.header.submessageId = SubmessageKind::DATA;
 #if IS_LITTLE_ENDIAN
@@ -170,7 +177,7 @@ void addSubMessageData(Buffer &buffer, const Buffer &filledPayload,
   msg.writerId = writerID;
 
   constexpr uint16_t octetsToInlineQoS =
-      4 + 4 + 8; // EntityIds + SequenceNumber
+    4 + 4 + 8; // EntityIds + SequenceNumber
   msg.octetsToInlineQos = octetsToInlineQoS;
 
   serializeMessage(buffer, msg);
@@ -184,11 +191,12 @@ void addSubMessageData(Buffer &buffer, const Buffer &filledPayload,
 template <class Buffer>
 void addHeartbeat(Buffer &buffer, EntityId_t writerId, EntityId_t readerId,
                   SequenceNumber_t firstSN, SequenceNumber_t lastSN,
-                  Count_t count) {
+                  Count_t count)
+{
   SubmessageHeartbeat subMsg;
   subMsg.header.submessageId = SubmessageKind::HEARTBEAT;
   subMsg.header.octetsToNextHeader =
-      SubmessageHeartbeat::getRawSize() - numBytesUntilEndOfLength;
+    SubmessageHeartbeat::getRawSize() - numBytesUntilEndOfLength;
 #if IS_LITTLE_ENDIAN
   subMsg.header.flags = FLAG_LITTLE_ENDIAN;
 #else
@@ -208,7 +216,8 @@ void addHeartbeat(Buffer &buffer, EntityId_t writerId, EntityId_t readerId,
 template <class Buffer>
 void addAckNack(Buffer &buffer, EntityId_t writerId, EntityId_t readerId,
                 SequenceNumberSet readerSNState, Count_t count,
-                bool final_flag) {
+                bool final_flag)
+{
   SubmessageAckNack subMsg;
   subMsg.header.submessageId = SubmessageKind::ACKNACK;
 #if IS_LITTLE_ENDIAN
@@ -222,7 +231,7 @@ void addAckNack(Buffer &buffer, EntityId_t writerId, EntityId_t readerId,
     subMsg.header.flags &= ~FLAG_FINAL; // For now, we don't want any response
   }
   subMsg.header.octetsToNextHeader =
-      SubmessageAckNack::getRawSize(readerSNState) - numBytesUntilEndOfLength;
+    SubmessageAckNack::getRawSize(readerSNState) - numBytesUntilEndOfLength;
 
   subMsg.writerId = writerId;
   subMsg.readerId = readerId;

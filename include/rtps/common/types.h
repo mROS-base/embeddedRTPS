@@ -32,7 +32,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include <initializer_list>
 
 // TODO subnamespaces
-namespace rtps {
+namespace rtps
+{
 
 // TODO move types to where they are needed!
 
@@ -88,7 +89,8 @@ enum class DurabilityKind_t : uint32_t {
 struct GuidPrefix_t {
   std::array<uint8_t, 12> id;
 
-  bool operator==(const GuidPrefix_t &other) const {
+  bool operator==(const GuidPrefix_t &other) const
+  {
     return this->id == other.id;
   }
 };
@@ -97,23 +99,29 @@ struct EntityId_t {
   std::array<uint8_t, 3> entityKey;
   EntityKind_t entityKind;
 
-  bool operator==(const EntityId_t &other) const {
+  bool operator==(const EntityId_t &other) const
+  {
     return this->entityKey == other.entityKey &&
            this->entityKind == other.entityKind;
   }
 
-  bool operator!=(const EntityId_t &other) const { return !(*this == other); }
+  bool operator!=(const EntityId_t &other) const
+  {
+    return !(*this == other);
+  }
 };
 
 struct Guid_t {
   GuidPrefix_t prefix;
   EntityId_t entityId;
 
-  bool operator==(const Guid_t &other) const {
+  bool operator==(const Guid_t &other) const
+  {
     return this->prefix == other.prefix && this->entityId == other.entityId;
   }
 
-  static uint32_t sum(const Guid_t &other) {
+  static uint32_t sum(const Guid_t &other)
+  {
     uint32_t ret = 0;
     for (const auto &i : other.prefix.id) {
       ret += i;
@@ -131,9 +139,10 @@ struct Time_t {
   int32_t seconds;   // time in seconds
   uint32_t fraction; // time in sec/2^32 (?)
 
-  static Time_t create(int32_t s, uint32_t ns) {
+  static Time_t create(int32_t s, uint32_t ns)
+  {
     static constexpr double factor =
-        (static_cast<uint64_t>(1) << 32) / 1000000000.;
+      (static_cast<uint64_t>(1) << 32) / 1000000000.;
     auto fraction = static_cast<uint32_t>(ns * factor);
     return Time_t{s, fraction};
   }
@@ -147,23 +156,28 @@ struct SequenceNumber_t {
   int32_t high;
   uint32_t low;
 
-  bool operator==(const SequenceNumber_t &other) const {
+  bool operator==(const SequenceNumber_t &other) const
+  {
     return high == other.high && low == other.low;
   }
 
-  bool operator!=(const SequenceNumber_t &other) const {
+  bool operator!=(const SequenceNumber_t &other) const
+  {
     return !(*this == other);
   }
 
-  bool operator<(const SequenceNumber_t &other) const {
+  bool operator<(const SequenceNumber_t &other) const
+  {
     return high < other.high || (high == other.high && low < other.low);
   }
 
-  bool operator<=(const SequenceNumber_t &other) const {
+  bool operator<=(const SequenceNumber_t &other) const
+  {
     return *this == other || *this < other;
   }
 
-  SequenceNumber_t &operator++() {
+  SequenceNumber_t &operator++()
+  {
     ++low;
     if (low == 0) {
       ++high;
@@ -171,7 +185,8 @@ struct SequenceNumber_t {
     return *this;
   }
 
-  SequenceNumber_t operator++(int) {
+  SequenceNumber_t operator++(int)
+  {
     SequenceNumber_t tmp(*this);
     ++*this;
     return tmp;
@@ -183,7 +198,7 @@ struct SequenceNumberSet {
 
   SequenceNumberSet() = default;
   explicit SequenceNumberSet(const SequenceNumber_t &firstMissing)
-      : base(firstMissing) {}
+    : base(firstMissing) {}
 
   SequenceNumber_t base = {0, 0};
   // Cannot be static because of packed
@@ -191,7 +206,8 @@ struct SequenceNumberSet {
   std::array<uint32_t, 1> bitMap{};
 
   // We only need 1 byte because atm we don't store packets.
-  bool isSet(uint32_t bit) const {
+  bool isSet(uint32_t bit) const
+  {
     if (bit >= SNS_NUM_BITS) {
       return true;
     }
@@ -236,27 +252,38 @@ struct ParticipantMessageData { // TODO
 /* Default Values */
 const EntityId_t ENTITYID_UNKNOWN{};
 const EntityId_t ENTITYID_BUILD_IN_PARTICIPANT = {
-    {00, 00, 01}, EntityKind_t::BUILD_IN_PARTICIPANT};
+  {00, 00, 01}, EntityKind_t::BUILD_IN_PARTICIPANT
+};
 const EntityId_t ENTITYID_SEDP_BUILTIN_TOPIC_WRITER = {
-    {00, 00, 02}, EntityKind_t::BUILD_IN_WRITER_WITH_KEY};
+  {00, 00, 02}, EntityKind_t::BUILD_IN_WRITER_WITH_KEY
+};
 const EntityId_t ENTITYID_SEDP_BUILTIN_TOPIC_READER = {
-    {00, 00, 02}, EntityKind_t::BUILD_IN_READER_WITH_KEY};
+  {00, 00, 02}, EntityKind_t::BUILD_IN_READER_WITH_KEY
+};
 const EntityId_t ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER = {
-    {00, 00, 03}, EntityKind_t::BUILD_IN_WRITER_WITH_KEY};
+  {00, 00, 03}, EntityKind_t::BUILD_IN_WRITER_WITH_KEY
+};
 const EntityId_t ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER = {
-    {00, 00, 03}, EntityKind_t::BUILD_IN_READER_WITH_KEY};
+  {00, 00, 03}, EntityKind_t::BUILD_IN_READER_WITH_KEY
+};
 const EntityId_t ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER = {
-    {00, 00, 04}, EntityKind_t::BUILD_IN_WRITER_WITH_KEY};
+  {00, 00, 04}, EntityKind_t::BUILD_IN_WRITER_WITH_KEY
+};
 const EntityId_t ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER = {
-    {00, 00, 04}, EntityKind_t::BUILD_IN_READER_WITH_KEY};
+  {00, 00, 04}, EntityKind_t::BUILD_IN_READER_WITH_KEY
+};
 const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER = {
-    {00, 01, 00}, EntityKind_t::BUILD_IN_WRITER_WITH_KEY};
+  {00, 01, 00}, EntityKind_t::BUILD_IN_WRITER_WITH_KEY
+};
 const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER = {
-    {00, 01, 00}, EntityKind_t::BUILD_IN_READER_WITH_KEY};
+  {00, 01, 00}, EntityKind_t::BUILD_IN_READER_WITH_KEY
+};
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER = {
-    {00, 02, 00}, EntityKind_t::BUILD_IN_WRITER_WITH_KEY};
+  {00, 02, 00}, EntityKind_t::BUILD_IN_WRITER_WITH_KEY
+};
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER = {
-    {00, 02, 00}, EntityKind_t::BUILD_IN_READER_WITH_KEY};
+  {00, 02, 00}, EntityKind_t::BUILD_IN_READER_WITH_KEY
+};
 
 const GuidPrefix_t GUIDPREFIX_UNKNOWN{};
 const Guid_t GUID_UNKNOWN{};

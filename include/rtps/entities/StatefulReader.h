@@ -32,10 +32,12 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/entities/WriterProxy.h"
 #include "rtps/storages/MemoryPool.h"
 
-namespace rtps {
+namespace rtps
+{
 struct SubmessageHeartbeat;
 
-template <class NetworkDriver> class StatefulReaderT final : public Reader {
+template <class NetworkDriver> class StatefulReaderT final : public Reader
+{
 public:
   ~StatefulReaderT() override;
   void init(const TopicData &attributes, NetworkDriver &driver);
@@ -49,7 +51,7 @@ public:
 
 private:
   PacketInfo
-      m_packetInfo; // TODO intended for reuse but buffer not used as such
+  m_packetInfo; // TODO intended for reuse but buffer not used as such
   NetworkDriver *m_transport;
 
   ddsReaderCallback_fp m_callback = nullptr;

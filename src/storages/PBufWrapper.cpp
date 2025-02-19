@@ -39,12 +39,14 @@ using rtps::PBufWrapper;
 #define PBUF_WRAP_LOG(...) //
 #endif
 
-PBufWrapper::PBufWrapper(pbuf *bufferToWrap) : firstElement(bufferToWrap) {
+PBufWrapper::PBufWrapper(pbuf *bufferToWrap) : firstElement(bufferToWrap)
+{
   m_freeSpace = 0; // Assume it to be full
 }
 
 PBufWrapper::PBufWrapper(DataSize_t length)
-    : firstElement(pbuf_alloc(m_layer, length, m_type)) {
+  : firstElement(pbuf_alloc(m_layer, length, m_type))
+{
 
   if (isValid()) {
     m_freeSpace = length;
@@ -52,14 +54,19 @@ PBufWrapper::PBufWrapper(DataSize_t length)
 }
 
 // TODO: Uses copy assignment. Improvement possible
-PBufWrapper::PBufWrapper(const PBufWrapper &other) { *this = other; }
+PBufWrapper::PBufWrapper(const PBufWrapper &other)
+{
+  *this = other;
+}
 
 // TODO: Uses move assignment. Improvement possible
-PBufWrapper::PBufWrapper(PBufWrapper &&other) noexcept {
+PBufWrapper::PBufWrapper(PBufWrapper &&other) noexcept
+{
   *this = std::move(other);
 }
 
-PBufWrapper &PBufWrapper::operator=(const PBufWrapper &other) {
+PBufWrapper &PBufWrapper::operator=(const PBufWrapper &other)
+{
   copySimpleMembersAndResetBuffer(other);
 
   if (other.firstElement != nullptr) {
@@ -69,7 +76,8 @@ PBufWrapper &PBufWrapper::operator=(const PBufWrapper &other) {
   return *this;
 }
 
-PBufWrapper &PBufWrapper::operator=(PBufWrapper &&other) noexcept {
+PBufWrapper &PBufWrapper::operator=(PBufWrapper &&other) noexcept
+{
   copySimpleMembersAndResetBuffer(other);
 
   if (other.firstElement != nullptr) {
@@ -79,7 +87,8 @@ PBufWrapper &PBufWrapper::operator=(PBufWrapper &&other) noexcept {
   return *this;
 }
 
-void PBufWrapper::copySimpleMembersAndResetBuffer(const PBufWrapper &other) {
+void PBufWrapper::copySimpleMembersAndResetBuffer(const PBufWrapper &other)
+{
   m_freeSpace = other.m_freeSpace;
 
   if (firstElement != nullptr) {
@@ -88,13 +97,15 @@ void PBufWrapper::copySimpleMembersAndResetBuffer(const PBufWrapper &other) {
   }
 }
 
-PBufWrapper::~PBufWrapper() {
+PBufWrapper::~PBufWrapper()
+{
   if (firstElement != nullptr) {
     pbuf_free(firstElement);
   }
 }
 
-PBufWrapper PBufWrapper::deepCopy() const {
+PBufWrapper PBufWrapper::deepCopy() const
+{
   PBufWrapper clone;
   clone.copySimpleMembersAndResetBuffer(*this);
 
@@ -110,11 +121,18 @@ PBufWrapper PBufWrapper::deepCopy() const {
   return clone;
 }
 
-bool PBufWrapper::isValid() const { return firstElement != nullptr; }
+bool PBufWrapper::isValid() const
+{
+  return firstElement != nullptr;
+}
 
-rtps::DataSize_t PBufWrapper::spaceLeft() const { return m_freeSpace; }
+rtps::DataSize_t PBufWrapper::spaceLeft() const
+{
+  return m_freeSpace;
+}
 
-rtps::DataSize_t PBufWrapper::spaceUsed() const {
+rtps::DataSize_t PBufWrapper::spaceUsed() const
+{
   if (firstElement == nullptr) {
     return 0;
   }
@@ -122,7 +140,8 @@ rtps::DataSize_t PBufWrapper::spaceUsed() const {
   return firstElement->tot_len - m_freeSpace;
 }
 
-bool PBufWrapper::append(const uint8_t *data, DataSize_t length) {
+bool PBufWrapper::append(const uint8_t *data, DataSize_t length)
+{
   if (data == nullptr) {
     return false;
   }
@@ -136,7 +155,8 @@ bool PBufWrapper::append(const uint8_t *data, DataSize_t length) {
   return true;
 }
 
-void PBufWrapper::append(PBufWrapper &&other) {
+void PBufWrapper::append(PBufWrapper &&other)
+{
   if (this == &other) {
     return;
   }
@@ -152,7 +172,8 @@ void PBufWrapper::append(PBufWrapper &&other) {
   other.firstElement = nullptr;
 }
 
-bool PBufWrapper::reserve(DataSize_t length) {
+bool PBufWrapper::reserve(DataSize_t length)
+{
   auto additionalAllocation = length - m_freeSpace;
   if (additionalAllocation <= 0) {
     return true;
@@ -161,13 +182,15 @@ bool PBufWrapper::reserve(DataSize_t length) {
   return increaseSizeBy(additionalAllocation);
 }
 
-void PBufWrapper::reset() {
+void PBufWrapper::reset()
+{
   if (firstElement != nullptr) {
     m_freeSpace = firstElement->tot_len;
   }
 }
 
-bool PBufWrapper::increaseSizeBy(uint16_t length) {
+bool PBufWrapper::increaseSizeBy(uint16_t length)
+{
   pbuf *allocation = pbuf_alloc(m_layer, length, m_type);
   if (allocation == nullptr) {
     return false;

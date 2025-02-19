@@ -27,15 +27,21 @@ Author: i11 - Embedded Software, RWTH Aachen University
 
 #include "lwip/sys.h"
 
-namespace rtps {
+namespace rtps
+{
 
-class Lock {
+class Lock
+{
 public:
-  explicit Lock(sys_mutex_t &passedMutex) : m_mutex(passedMutex) {
+  explicit Lock(sys_mutex_t &passedMutex) : m_mutex(passedMutex)
+  {
     sys_mutex_lock(&m_mutex);
   };
 
-  ~Lock() { sys_mutex_unlock(&m_mutex); };
+  ~Lock()
+  {
+    sys_mutex_unlock(&m_mutex);
+  };
 
 private:
   sys_mutex_t &m_mutex;

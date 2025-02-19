@@ -30,7 +30,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/entities/StatelessWriter.h"
 #include "rtps/entities/Writer.h"
 
-namespace rtps {
+namespace rtps
+{
 
 struct BuiltInEndpoints {
   Writer *spdpWriter = nullptr;

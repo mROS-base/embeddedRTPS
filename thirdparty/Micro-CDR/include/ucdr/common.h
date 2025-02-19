@@ -27,21 +27,20 @@ extern "C" {
 #include <stddef.h>
 
 typedef enum ucdrEndianness {
-    UCDR_BIG_ENDIANNESS,
-    UCDR_LITTLE_ENDIANNESS
+  UCDR_BIG_ENDIANNESS,
+  UCDR_LITTLE_ENDIANNESS
 
 } ucdrEndianness;
 
-typedef struct ucdrBuffer
-{
-    const uint8_t *init;
-    const uint8_t *final;
-    uint8_t *iterator;
+typedef struct ucdrBuffer {
+  const uint8_t *init;
+  const uint8_t *final;
+  uint8_t *iterator;
 
-    ucdrEndianness endianness;
-    uint32_t last_data_size;
+  ucdrEndianness endianness;
+  uint32_t last_data_size;
 
-    bool error;
+  bool error;
 
 } ucdrBuffer;
 
