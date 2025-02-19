@@ -44,7 +44,8 @@ using rtps::SEDPAgent;
 #define SEDP_LOG(...) //
 #endif
 
-void SEDPAgent::init(Participant &part, const BuiltInEndpoints &endpoints) {
+void SEDPAgent::init(Participant &part, const BuiltInEndpoints &endpoints)
+{
   // TODO move
   if (sys_mutex_new(&m_mutex) != ERR_OK) {
     SEDP_LOG("SEDPAgent failed to create mutex\n");
@@ -58,35 +59,40 @@ void SEDPAgent::init(Participant &part, const BuiltInEndpoints &endpoints) {
   }
   if (m_endpoints.sedpSubReader != nullptr) {
     m_endpoints.sedpSubReader->registerCallback(receiveCallbackSubscriber,
-                                                this);
+        this);
   }
 }
 
 void SEDPAgent::registerOnNewPublisherMatchedCallback(
-    void (*callback)(void *arg), void *args) {
+  void (*callback)(void *arg), void *args)
+{
   mfp_onNewPublisherCallback = callback;
   m_onNewPublisherArgs = args;
 }
 
 void SEDPAgent::registerOnNewSubscriberMatchedCallback(
-    void (*callback)(void *arg), void *args) {
+  void (*callback)(void *arg), void *args)
+{
   mfp_onNewSubscriberCallback = callback;
   m_onNewSubscriberArgs = args;
 }
 
 void SEDPAgent::receiveCallbackPublisher(void *callee,
-                                         const ReaderCacheChange &cacheChange) {
+    const ReaderCacheChange &cacheChange)
+{
   auto agent = static_cast<SEDPAgent *>(callee);
   agent->onNewPublisher(cacheChange);
 }
 
 void SEDPAgent::receiveCallbackSubscriber(
-    void *callee, const ReaderCacheChange &cacheChange) {
+  void *callee, const ReaderCacheChange &cacheChange)
+{
   auto agent = static_cast<SEDPAgent *>(callee);
   agent->onNewSubscriber(cacheChange);
 }
 
-void SEDPAgent::onNewPublisher(const ReaderCacheChange &change) {
+void SEDPAgent::onNewPublisher(const ReaderCacheChange &change)
+{
   Lock lock{m_mutex};
 #if SEDP_VERBOSE
   SEDP_LOG("New publisher\n");
@@ -107,7 +113,8 @@ void SEDPAgent::onNewPublisher(const ReaderCacheChange &change) {
   }
 }
 
-void SEDPAgent::addUnmatchedRemoteWriter(const TopicData &writerData) {
+void SEDPAgent::addUnmatchedRemoteWriter(const TopicData &writerData)
+{
   if (m_unmatchedRemoteWriters.isFull()) {
 #if SEDP_VERBOSE
     SEDP_LOG("List of unmatched remote writers is full.\n");
@@ -119,7 +126,8 @@ void SEDPAgent::addUnmatchedRemoteWriter(const TopicData &writerData) {
   m_unmatchedRemoteWriters.add(TopicDataCompressed(writerData));
 }
 
-void SEDPAgent::addUnmatchedRemoteReader(const TopicData &readerData) {
+void SEDPAgent::addUnmatchedRemoteReader(const TopicData &readerData)
+{
   if (m_unmatchedRemoteReaders.isFull()) {
 #if SEDP_VERBOSE
     SEDP_LOG("List of unmatched remote readers is full.\n");
@@ -132,7 +140,8 @@ void SEDPAgent::addUnmatchedRemoteReader(const TopicData &readerData) {
 }
 
 void SEDPAgent::removeUnmatchedEntitiesOfParticipant(
-    const GuidPrefix_t &guidPrefix) {
+  const GuidPrefix_t &guidPrefix)
+{
   auto isElementToRemove = [&](const TopicDataCompressed &topicData) {
     return topicData.endpointGuid.prefix == guidPrefix;
   };
@@ -145,15 +154,18 @@ void SEDPAgent::removeUnmatchedEntitiesOfParticipant(
   m_unmatchedRemoteWriters.remove(thunk, &isElementToRemove);
 }
 
-uint32_t SEDPAgent::getNumRemoteUnmatchedReaders() {
+uint32_t SEDPAgent::getNumRemoteUnmatchedReaders()
+{
   return m_unmatchedRemoteReaders.getNumElements();
 }
 
-uint32_t SEDPAgent::getNumRemoteUnmatchedWriters() {
+uint32_t SEDPAgent::getNumRemoteUnmatchedWriters()
+{
   return m_unmatchedRemoteWriters.getNumElements();
 }
 
-void SEDPAgent::onNewPublisher(const TopicData &writerData) {
+void SEDPAgent::onNewPublisher(const TopicData &writerData)
+{
   // TODO Is it okay to add Endpoint if the respective participant is unknown
   // participant?
   if (!m_part->findRemoteParticipant(writerData.endpointGuid.prefix)) {
@@ -182,13 +194,14 @@ void SEDPAgent::onNewPublisher(const TopicData &writerData) {
   SEDP_LOG("publisher\n");
 #endif
   reader->addNewMatchedWriter(
-      WriterProxy{writerData.endpointGuid, writerData.unicastLocator});
+    WriterProxy{writerData.endpointGuid, writerData.unicastLocator});
   if (mfp_onNewPublisherCallback != nullptr) {
     mfp_onNewPublisherCallback(m_onNewPublisherArgs);
   }
 }
 
-void SEDPAgent::onNewSubscriber(const ReaderCacheChange &change) {
+void SEDPAgent::onNewSubscriber(const ReaderCacheChange &change)
+{
   Lock lock{m_mutex};
 #if SEDP_VERBOSE
   SEDP_LOG("New subscriber\n");
@@ -209,7 +222,8 @@ void SEDPAgent::onNewSubscriber(const ReaderCacheChange &change) {
   }
 }
 
-void SEDPAgent::onNewSubscriber(const TopicData &readerData) {
+void SEDPAgent::onNewSubscriber(const TopicData &readerData)
+{
   if (!m_part->findRemoteParticipant(readerData.endpointGuid.prefix)) {
     return;
   }
@@ -243,7 +257,7 @@ void SEDPAgent::onNewSubscriber(const TopicData &readerData) {
                                             readerData.multicastLocator});
   } else {
     writer->addNewMatchedReader(
-        ReaderProxy{readerData.endpointGuid, readerData.unicastLocator});
+      ReaderProxy{readerData.endpointGuid, readerData.unicastLocator});
   }
 
   if (mfp_onNewSubscriberCallback != nullptr) {
@@ -251,13 +265,14 @@ void SEDPAgent::onNewSubscriber(const TopicData &readerData) {
   }
 }
 
-void SEDPAgent::tryMatchUnmatchedEndpoints() {
+void SEDPAgent::tryMatchUnmatchedEndpoints()
+{
   // Try to match remote readers with local writers
   for (auto &proxy : m_unmatchedRemoteReaders) {
     auto writer = m_part->getMatchingWriter(proxy);
     if (writer != nullptr) {
       writer->addNewMatchedReader(ReaderProxy{
-          proxy.endpointGuid, proxy.unicastLocator, proxy.multicastLocator});
+        proxy.endpointGuid, proxy.unicastLocator, proxy.multicastLocator});
     }
   }
 
@@ -266,17 +281,18 @@ void SEDPAgent::tryMatchUnmatchedEndpoints() {
     auto reader = m_part->getMatchingReader(proxy);
     if (reader != nullptr) {
       reader->addNewMatchedWriter(
-          WriterProxy{proxy.endpointGuid, proxy.unicastLocator});
+        WriterProxy{proxy.endpointGuid, proxy.unicastLocator});
     }
   }
 }
 
-void SEDPAgent::addWriter(Writer &writer) {
+void SEDPAgent::addWriter(Writer &writer)
+{
   if (m_endpoints.sedpPubWriter == nullptr) {
     return;
   }
   EntityKind_t writerKind =
-      writer.m_attributes.endpointGuid.entityId.entityKind;
+    writer.m_attributes.endpointGuid.entityId.entityKind;
   if (writerKind == EntityKind_t::BUILD_IN_WRITER_WITH_KEY ||
       writerKind == EntityKind_t::BUILD_IN_WRITER_WITHOUT_KEY) {
     return; // No need to announce builtin endpoints
@@ -304,13 +320,14 @@ void SEDPAgent::addWriter(Writer &writer) {
 #endif
 }
 
-void SEDPAgent::addReader(Reader &reader) {
+void SEDPAgent::addReader(Reader &reader)
+{
   if (m_endpoints.sedpSubWriter == nullptr) {
     return;
   }
 
   EntityKind_t readerKind =
-      reader.m_attributes.endpointGuid.entityId.entityKind;
+    reader.m_attributes.endpointGuid.entityId.entityKind;
   if (readerKind == EntityKind_t::BUILD_IN_READER_WITH_KEY ||
       readerKind == EntityKind_t::BUILD_IN_READER_WITHOUT_KEY) {
     return; // No need to announce builtin endpoints

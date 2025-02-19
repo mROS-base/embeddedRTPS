@@ -7,20 +7,23 @@
 
 #include "rtps/common/types.h"
 
-inline void printEntityId(rtps::EntityId_t id) {
+inline void printEntityId(rtps::EntityId_t id)
+{
   for (const auto byte : id.entityKey) {
     printf("%x", (int)byte);
   }
   printf("%x", static_cast<uint8_t>(id.entityKind));
 }
 
-inline void printGuidPrefix(rtps::GuidPrefix_t prefix) {
+inline void printGuidPrefix(rtps::GuidPrefix_t prefix)
+{
   for (const auto byte : prefix.id) {
     printf("%x", (int)byte);
   }
 }
 
-inline void printGuid(rtps::Guid_t guid) {
+inline void printGuid(rtps::Guid_t guid)
+{
   printGuidPrefix(guid.prefix);
   printf(":");
   printEntityId(guid.entityId);

@@ -40,7 +40,8 @@ using rtps::StatelessReader;
 #define SLR_LOG(...) //
 #endif
 
-void StatelessReader::init(const TopicData &attributes) {
+void StatelessReader::init(const TopicData &attributes)
+{
   m_attributes = attributes;
   m_is_initialized_ = true;
   if (sys_mutex_new(&m_mutex) != ERR_OK) {
@@ -48,13 +49,15 @@ void StatelessReader::init(const TopicData &attributes) {
   }
 }
 
-void StatelessReader::newChange(const ReaderCacheChange &cacheChange) {
+void StatelessReader::newChange(const ReaderCacheChange &cacheChange)
+{
   if (m_callback != nullptr) {
     m_callback(m_callee, cacheChange);
   }
 }
 
-void StatelessReader::registerCallback(ddsReaderCallback_fp cb, void *callee) {
+void StatelessReader::registerCallback(ddsReaderCallback_fp cb, void *callee)
+{
   if (cb != nullptr) {
     m_callback = cb;
     m_callee = callee; // It's okay if this is null
@@ -65,7 +68,8 @@ void StatelessReader::registerCallback(ddsReaderCallback_fp cb, void *callee) {
   }
 }
 
-bool StatelessReader::addNewMatchedWriter(const WriterProxy &newProxy) {
+bool StatelessReader::addNewMatchedWriter(const WriterProxy &newProxy)
+{
 #if (SLR_VERBOSE && RTPS_GLOBAL_VERBOSE)
   SLR_LOG("Adding WriterProxy");
   printGuid(newProxy.remoteWriterGuid);
@@ -74,7 +78,8 @@ bool StatelessReader::addNewMatchedWriter(const WriterProxy &newProxy) {
   return m_proxies.add(newProxy);
 }
 
-void StatelessReader::removeWriter(const Guid_t &guid) {
+void StatelessReader::removeWriter(const Guid_t &guid)
+{
   Lock lock(m_mutex);
   auto isElementToRemove = [&](const WriterProxy &proxy) {
     return proxy.remoteWriterGuid == guid;
@@ -87,7 +92,8 @@ void StatelessReader::removeWriter(const Guid_t &guid) {
 }
 
 void StatelessReader::removeWriterOfParticipant(
-    const GuidPrefix_t &guidPrefix) {
+  const GuidPrefix_t &guidPrefix)
+{
   Lock lock(m_mutex);
   auto isElementToRemove = [&](const WriterProxy &proxy) {
     return proxy.remoteWriterGuid.prefix == guidPrefix;
@@ -100,7 +106,8 @@ void StatelessReader::removeWriterOfParticipant(
 }
 
 bool StatelessReader::onNewHeartbeat(const SubmessageHeartbeat &,
-                                     const GuidPrefix_t &) {
+                                     const GuidPrefix_t &)
+{
   // nothing to do
   return true;
 }

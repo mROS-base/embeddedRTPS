@@ -34,7 +34,8 @@ using rtps::ThreadPool;
 #define THREAD_POOL_VERBOSE 0
 #if THREAD_POOL_VERBOSE && RTPS_GLOBAL_VERBOSE
 #define THREAD_POOL_LOG(...)
-if (true) {
+if (true)
+{
   printf("[ThreadPool] ");
   printf(__VA_ARGS__);
   printf("\n");
@@ -44,7 +45,8 @@ if (true) {
 #endif
 
 ThreadPool::ThreadPool(receiveJumppad_fp receiveCallback, void *callee)
-    : m_receiveJumppad(receiveCallback), m_callee(callee) {
+  : m_receiveJumppad(receiveCallback), m_callee(callee)
+{
 
   if (!m_queueOutgoing.init() || !m_queueIncoming.init()) {
     return;
@@ -57,7 +59,8 @@ ThreadPool::ThreadPool(receiveJumppad_fp receiveCallback, void *callee)
   }
 }
 
-ThreadPool::~ThreadPool() {
+ThreadPool::~ThreadPool()
+{
   if (m_running) {
     stopThreads();
     sys_msleep(500);
@@ -71,7 +74,8 @@ ThreadPool::~ThreadPool() {
   }
 }
 
-bool ThreadPool::startThreads() {
+bool ThreadPool::startThreads()
+{
   if (m_running) {
     return true;
   }
@@ -97,7 +101,8 @@ bool ThreadPool::startThreads() {
   return true;
 }
 
-void ThreadPool::stopThreads() {
+void ThreadPool::stopThreads()
+{
   m_running = false;
   // This should call all the semaphores for each thread once, so they don't
   // stuck before ended.
@@ -114,12 +119,14 @@ void ThreadPool::stopThreads() {
   sys_msleep(10);
 }
 
-void ThreadPool::clearQueues() {
+void ThreadPool::clearQueues()
+{
   m_queueOutgoing.clear();
   m_queueIncoming.clear();
 }
 
-bool ThreadPool::addWorkload(Writer *workload) {
+bool ThreadPool::addWorkload(Writer *workload)
+{
   bool res = m_queueOutgoing.moveElementIntoBuffer(std::move(workload));
   if (res) {
     sys_sem_signal(&m_writerNotificationSem);
@@ -128,7 +135,8 @@ bool ThreadPool::addWorkload(Writer *workload) {
   return res;
 }
 
-bool ThreadPool::addNewPacket(PacketInfo &&packet) {
+bool ThreadPool::addNewPacket(PacketInfo &&packet)
+{
   bool res = m_queueIncoming.moveElementIntoBuffer(std::move(packet));
   if (res) {
     sys_sem_signal(&m_readerNotificationSem);
@@ -136,7 +144,8 @@ bool ThreadPool::addNewPacket(PacketInfo &&packet) {
   return res;
 }
 
-void ThreadPool::writerThreadFunction(void *arg) {
+void ThreadPool::writerThreadFunction(void *arg)
+{
   auto pool = static_cast<ThreadPool *>(arg);
   if (pool == nullptr) {
 
@@ -148,7 +157,8 @@ void ThreadPool::writerThreadFunction(void *arg) {
   pool->doWriterWork();
 }
 
-void ThreadPool::doWriterWork() {
+void ThreadPool::doWriterWork()
+{
   while (m_running) {
     Writer *workload;
     auto isWorkToDo = m_queueOutgoing.moveFirstInto(workload);
@@ -162,7 +172,8 @@ void ThreadPool::doWriterWork() {
 }
 
 void ThreadPool::readCallback(void *args, udp_pcb *target, pbuf *pbuf,
-                              const ip_addr_t * /*addr*/, Ip4Port_t port) {
+                              const ip_addr_t * /*addr*/, Ip4Port_t port)
+{
   auto &pool = *static_cast<ThreadPool *>(args);
 
   PacketInfo packet;
@@ -186,7 +197,8 @@ void ThreadPool::readCallback(void *args, udp_pcb *target, pbuf *pbuf,
   }
 }
 
-void ThreadPool::readerThreadFunction(void *arg) {
+void ThreadPool::readerThreadFunction(void *arg)
+{
   auto pool = static_cast<ThreadPool *>(arg);
   if (pool == nullptr) {
 
@@ -197,7 +209,8 @@ void ThreadPool::readerThreadFunction(void *arg) {
   pool->doReaderWork();
 }
 
-void ThreadPool::doReaderWork() {
+void ThreadPool::doReaderWork()
+{
 
   while (m_running) {
     PacketInfo packet;

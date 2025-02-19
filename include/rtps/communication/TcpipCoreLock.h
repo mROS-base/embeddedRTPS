@@ -27,11 +27,19 @@ Author: i11 - Embedded Software, RWTH Aachen University
 
 #include <lwip/tcpip.h>
 
-namespace rtps {
-class TcpipCoreLock {
+namespace rtps
+{
+class TcpipCoreLock
+{
 public:
-  TcpipCoreLock() { LOCK_TCPIP_CORE(); }
-  ~TcpipCoreLock() { UNLOCK_TCPIP_CORE(); }
+  TcpipCoreLock()
+  {
+    LOCK_TCPIP_CORE();
+  }
+  ~TcpipCoreLock()
+  {
+    UNLOCK_TCPIP_CORE();
+  }
 };
 } // namespace rtps
 

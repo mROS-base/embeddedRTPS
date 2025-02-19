@@ -27,8 +27,10 @@ Author: i11 - Embedded Software, RWTH Aachen University
 
 #include "rtps/entities/Reader.h"
 
-namespace rtps {
-class StatelessReader final : public Reader {
+namespace rtps
+{
+class StatelessReader final : public Reader
+{
 public:
   void init(const TopicData &attributes);
   void newChange(const ReaderCacheChange &cacheChange) override;

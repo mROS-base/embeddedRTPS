@@ -30,13 +30,15 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/discovery/BuiltInEndpoints.h"
 #include <cstdint>
 
-namespace rtps {
+namespace rtps
+{
 class Reader;
 class Writer;
 class Participant;
 class MessageProcessingInfo;
 
-class MessageReceiver {
+class MessageReceiver
+{
 public:
   GuidPrefix_t sourceGuidPrefix = GUIDPREFIX_UNKNOWN;
   ProtocolVersion_t sourceVersion = PROTOCOLVERSION;

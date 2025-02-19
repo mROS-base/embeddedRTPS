@@ -35,8 +35,10 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/storages/PBufWrapper.h"
 #include <rtps/common/Locator.h>
 
-namespace rtps {
-class Domain {
+namespace rtps
+{
+class Domain
+{
 public:
   Domain();
   ~Domain();

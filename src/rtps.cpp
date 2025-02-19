@@ -51,7 +51,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 
 static struct netif netif;
 
-static void init(void *arg) {
+static void init(void *arg)
+{
   if (arg == nullptr) {
 #if INIT_VERBOSE
     printf("Failed to init. nullptr passed");
@@ -88,7 +89,8 @@ static void init(void *arg) {
   sys_sem_signal(init_sem);
 }
 
-void LwIPInit() {
+void LwIPInit()
+{
   /* no stdio-buffering, please! */
   setvbuf(stdout, nullptr, _IONBF, 0);
 
@@ -105,7 +107,8 @@ void LwIPInit() {
   sys_sem_free(&init_sem);
 }
 
-void rtps::init() {
+void rtps::init()
+{
   // TODO This is not threadsafe. Might cause problems in tests. For now, it
   // seems to work.
   static bool initialized = false;

@@ -28,7 +28,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "lwip/pbuf.h"
 #include "rtps/common/types.h"
 
-namespace rtps {
+namespace rtps
+{
 
 struct PBufWrapper {
 

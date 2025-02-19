@@ -28,7 +28,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/common/types.h"
 #include "rtps/storages/PBufWrapper.h"
 
-namespace rtps {
+namespace rtps
+{
 
 struct PacketInfo {
   Ip4Port_t srcPort; // TODO Do we need that?
@@ -36,7 +37,8 @@ struct PacketInfo {
   Ip4Port_t destPort;
   PBufWrapper buffer;
 
-  void copyTriviallyCopyable(const PacketInfo &other) {
+  void copyTriviallyCopyable(const PacketInfo &other)
+  {
     this->srcPort = other.srcPort;
     this->destPort = other.destPort;
     this->destAddr = other.destAddr;
@@ -45,13 +47,15 @@ struct PacketInfo {
   PacketInfo() = default;
   ~PacketInfo() = default;
 
-  PacketInfo &operator=(const PacketInfo &other) {
+  PacketInfo &operator=(const PacketInfo &other)
+  {
     copyTriviallyCopyable(other);
     this->buffer = other.buffer;
     return *this;
   }
 
-  PacketInfo &operator=(PacketInfo &&other) noexcept {
+  PacketInfo &operator=(PacketInfo &&other) noexcept
+  {
     copyTriviallyCopyable(other);
     this->buffer = std::move(other.buffer);
     return *this;

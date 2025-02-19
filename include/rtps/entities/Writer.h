@@ -32,9 +32,11 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/storages/MemoryPool.h"
 #include "rtps/storages/PBufWrapper.h"
 
-namespace rtps {
+namespace rtps
+{
 
-class Writer {
+class Writer
+{
 public:
   TopicData m_attributes;
   virtual bool addNewMatchedReader(const ReaderProxy &newProxy) = 0;
@@ -47,14 +49,20 @@ public:
   virtual const CacheChange *newChange(ChangeKind_t kind, const uint8_t *data,
                                        DataSize_t size) = 0;
   virtual const CacheChange *newChangeCallback(ChangeKind_t kind,
-					       CacheChange::SerializerCallback func, FragDataSize_t) = 0;
+      CacheChange::SerializerCallback func, FragDataSize_t) = 0;
   virtual void setAllChangesToUnsent() = 0;
   virtual void onNewAckNack(const SubmessageAckNack &msg,
                             const GuidPrefix_t &sourceGuidPrefix) = 0;
 
-  bool isInitialized() { return m_is_initialized_; }
+  bool isInitialized()
+  {
+    return m_is_initialized_;
+  }
 
-  uint32_t getNumMatchedReader() { return m_proxies.getSize(); }
+  uint32_t getNumMatchedReader()
+  {
+    return m_proxies.getSize();
+  }
 
 protected:
   friend class SizeInspector;

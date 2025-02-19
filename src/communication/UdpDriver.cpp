@@ -45,10 +45,11 @@ using rtps::UdpDriver;
 #endif
 
 UdpDriver::UdpDriver(rtps::UdpDriver::udpRxFunc_fp callback, void *args)
-    : m_rxCallback(callback), m_callbackArgs(args) {}
+  : m_rxCallback(callback), m_callbackArgs(args) {}
 
 const rtps::UdpConnection *
-UdpDriver::createUdpConnection(Ip4Port_t receivePort) {
+UdpDriver::createUdpConnection(Ip4Port_t receivePort)
+{
   for (uint8_t i = 0; i < m_numConns; ++i) {
     if (m_conns[i].port == receivePort) {
       return &m_conns[i];
@@ -82,16 +83,19 @@ UdpDriver::createUdpConnection(Ip4Port_t receivePort) {
   return &m_conns[m_numConns - 1];
 }
 
-bool UdpDriver::isSameSubnet(ip4_addr_t addr) {
+bool UdpDriver::isSameSubnet(ip4_addr_t addr)
+{
   return (ip4_addr_netcmp(&addr, &(netif_default->ip_addr),
                           &(netif_default->netmask)) != 0);
 }
 
-bool UdpDriver::isMulticastAddress(ip4_addr_t addr) {
+bool UdpDriver::isMulticastAddress(ip4_addr_t addr)
+{
   return ((addr.addr >> 28) == 14);
 }
 
-bool UdpDriver::joinMultiCastGroup(ip4_addr_t addr) const {
+bool UdpDriver::joinMultiCastGroup(ip4_addr_t addr) const
+{
   err_t iret;
 
   {
@@ -114,7 +118,8 @@ bool UdpDriver::joinMultiCastGroup(ip4_addr_t addr) const {
 }
 
 bool UdpDriver::sendPacket(const UdpConnection &conn, ip4_addr_t &destAddr,
-                           Ip4Port_t destPort, pbuf &buffer) {
+                           Ip4Port_t destPort, pbuf &buffer)
+{
   err_t err;
   {
     TcpipCoreLock lock;
@@ -132,7 +137,8 @@ bool UdpDriver::sendPacket(const UdpConnection &conn, ip4_addr_t &destAddr,
   return true;
 }
 
-void UdpDriver::sendPacket(PacketInfo &packet) {
+void UdpDriver::sendPacket(PacketInfo &packet)
+{
   auto p_conn = createUdpConnection(packet.srcPort);
   if (p_conn == nullptr) {
     ;

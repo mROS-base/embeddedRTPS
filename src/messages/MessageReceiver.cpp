@@ -46,14 +46,16 @@ using rtps::MessageReceiver;
 
 MessageReceiver::MessageReceiver(Participant *part) : mp_part(part) {}
 
-void MessageReceiver::resetState() {
+void MessageReceiver::resetState()
+{
   sourceGuidPrefix = GUIDPREFIX_UNKNOWN;
   sourceVersion = PROTOCOLVERSION;
   sourceVendor = VENDOR_UNKNOWN;
   haveTimeStamp = false;
 }
 
-bool MessageReceiver::processMessage(const uint8_t *data, DataSize_t size) {
+bool MessageReceiver::processMessage(const uint8_t *data, DataSize_t size)
+{
   resetState();
   MessageProcessingInfo msgInfo(data, size);
 
@@ -71,7 +73,8 @@ bool MessageReceiver::processMessage(const uint8_t *data, DataSize_t size) {
   return true;
 }
 
-bool MessageReceiver::processHeader(MessageProcessingInfo &msgInfo) {
+bool MessageReceiver::processHeader(MessageProcessingInfo &msgInfo)
+{
   Header header;
   if (!deserializeMessage(msgInfo, header)) {
     return false;
@@ -96,7 +99,8 @@ bool MessageReceiver::processHeader(MessageProcessingInfo &msgInfo) {
 }
 
 bool MessageReceiver::processSubmessage(MessageProcessingInfo &msgInfo,
-                                        const SubmessageHeader &submsgHeader) {
+                                        const SubmessageHeader &submsgHeader)
+{
   bool success = false;
 
   switch (submsgHeader.submessageId) {
@@ -126,19 +130,20 @@ bool MessageReceiver::processSubmessage(MessageProcessingInfo &msgInfo,
     success = false;
   }
   msgInfo.nextPos +=
-      submsgHeader.octetsToNextHeader + SubmessageHeader::getRawSize();
+    submsgHeader.octetsToNextHeader + SubmessageHeader::getRawSize();
   return success;
 }
 
 bool MessageReceiver::processDataSubmessage(
-    MessageProcessingInfo &msgInfo, const SubmessageHeader &submsgHeader) {
+  MessageProcessingInfo &msgInfo, const SubmessageHeader &submsgHeader)
+{
   SubmessageData dataSubmsg;
   if (!deserializeMessage(msgInfo, dataSubmsg)) {
     return false;
   }
 
   const uint8_t *serializedData =
-      msgInfo.getPointerToCurrentPos() + SubmessageData::getRawSize();
+    msgInfo.getPointerToCurrentPos() + SubmessageData::getRawSize();
 
   const DataSize_t size = submsgHeader.octetsToNextHeader -
                           SubmessageData::getRawSize() +
@@ -154,14 +159,15 @@ bool MessageReceiver::processDataSubmessage(
     printf("\n");
 #endif
     reader = mp_part->getReaderByWriterId(
-        Guid_t{sourceGuidPrefix, dataSubmsg.writerId});
-    if (reader != nullptr)
+               Guid_t{sourceGuidPrefix, dataSubmsg.writerId});
+    if (reader != nullptr) {
       RECV_LOG("Found reader!");
+    }
   } else {
     reader = mp_part->getReader(dataSubmsg.readerId);
 #if RECV_VERBOSE && RTPS_GLOBAL_VERBOSE
     auto reader_by_writer = mp_part->getReaderByWriterId(
-        Guid_t{sourceGuidPrefix, dataSubmsg.writerId});
+                              Guid_t{sourceGuidPrefix, dataSubmsg.writerId});
 
     if (reader_by_writer == nullptr && reader != nullptr) {
       RECV_LOG("FOUND By READER ID, NOT BY WRITER ID =");
@@ -187,7 +193,8 @@ bool MessageReceiver::processDataSubmessage(
 }
 
 bool MessageReceiver::processHeartbeatSubmessage(
-    MessageProcessingInfo &msgInfo) {
+  MessageProcessingInfo &msgInfo)
+{
   SubmessageHeartbeat submsgHB;
   if (!deserializeMessage(msgInfo, submsgHB)) {
     return false;
@@ -203,7 +210,8 @@ bool MessageReceiver::processHeartbeatSubmessage(
   }
 }
 
-bool MessageReceiver::processAckNackSubmessage(MessageProcessingInfo &msgInfo) {
+bool MessageReceiver::processAckNackSubmessage(MessageProcessingInfo &msgInfo)
+{
   SubmessageAckNack submsgAckNack;
   if (!deserializeMessage(msgInfo, submsgAckNack)) {
     return false;

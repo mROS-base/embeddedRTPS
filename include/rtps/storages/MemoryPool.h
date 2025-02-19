@@ -29,11 +29,14 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include <cstring>
 #include <iterator>
 
-namespace rtps {
+namespace rtps
+{
 
-template <class TYPE, uint32_t SIZE> class MemoryPool {
+template <class TYPE, uint32_t SIZE> class MemoryPool
+{
 public:
-  template <typename IT_TYPE> class MemoryPoolIterator {
+  template <typename IT_TYPE> class MemoryPoolIterator
+  {
   public:
     using iterator_category = std::input_iterator_tag;
     using value_type = IT_TYPE;
@@ -41,7 +44,8 @@ public:
     using pointer = IT_TYPE *;
     using reference = IT_TYPE &;
 
-    explicit MemoryPoolIterator(MemoryPool<TYPE, SIZE> &pool) : m_pool(pool) {
+    explicit MemoryPoolIterator(MemoryPool<TYPE, SIZE> &pool) : m_pool(pool)
+    {
       memcpy(m_bitMap, m_pool.m_bitMap, sizeof(m_bitMap));
     }
 
@@ -49,16 +53,24 @@ public:
     //    return bit == other.bit;
     //}
 
-    bool operator!=(const MemoryPoolIterator &other) const {
+    bool operator!=(const MemoryPoolIterator &other) const
+    {
       return m_bit != other.m_bit;
     }
 
-    reference operator*() const { return m_pool.m_data[m_bit]; }
+    reference operator*() const
+    {
+      return m_pool.m_data[m_bit];
+    }
 
-    reference operator->() const { return m_pool.m_data[m_bit]; }
+    reference operator->() const
+    {
+      return m_pool.m_data[m_bit];
+    }
 
     // Pre-increment
-    MemoryPoolIterator &operator++() {
+    MemoryPoolIterator &operator++()
+    {
       if (m_pool.m_numElements == 0) {
         m_bit = SIZE;
         return *this;
@@ -73,7 +85,8 @@ public:
     }
 
     // Post-increment
-    MemoryPoolIterator operator++(int) {
+    MemoryPoolIterator operator++(int)
+    {
       MemoryPoolIterator tmp(*this);
       ++(*this);
       return tmp;
@@ -91,15 +104,28 @@ public:
 
   typedef bool (*condition_fp)(TYPE);
 
-  uint32_t getSize() { return SIZE; }
+  uint32_t getSize()
+  {
+    return SIZE;
+  }
 
-  bool isFull() { return m_numElements == SIZE; }
+  bool isFull()
+  {
+    return m_numElements == SIZE;
+  }
 
-  bool isEmpty() { return m_numElements == 0; }
+  bool isEmpty()
+  {
+    return m_numElements == 0;
+  }
 
-  uint32_t getNumElements() { return m_numElements; }
+  uint32_t getNumElements()
+  {
+    return m_numElements;
+  }
 
-  bool add(const TYPE &data) {
+  bool add(const TYPE &data)
+  {
     if (isFull()) {
       printf("[MemoryPool] RESSOURCE LIMIT EXCEEDED \n");
       return false;
@@ -133,15 +159,16 @@ public:
    * NOTE: You have to make sure that the callback did not run out of scope.
    */
   bool remove(bool (*jumppad)(void *, const TYPE &data),
-              void *isCorrectElement) {
+              void *isCorrectElement)
+  {
     bool retcode = false;
     for (auto it = begin(); it != end(); ++it) {
       if (jumppad(isCorrectElement, *it)) {
         const uint8_t bucket = it.m_bit / uint8_t{8};
         const uint8_t pos =
-            it.m_bit &
-            uint8_t{
-                7}; // 7 sets all bits above and including the one for 8 to 0
+          it.m_bit &
+        uint8_t{
+          7}; // 7 sets all bits above and including the one for 8 to 0
         m_bitMap[bucket] &= ~(static_cast<uint8_t>(1) << pos);
         --m_numElements;
         retcode = true;
@@ -151,7 +178,8 @@ public:
   }
 
   TYPE *find(bool (*jumppad)(void *, const TYPE &data),
-             void *isCorrectElement) {
+             void *isCorrectElement)
+  {
     for (auto it = begin(); it != end(); ++it) {
       if (jumppad(isCorrectElement, *it)) {
         return &(*it);
@@ -160,7 +188,8 @@ public:
     return nullptr;
   }
 
-  MemPoolIter begin() {
+  MemPoolIter begin()
+  {
     MemPoolIter it(*this);
     if (!(m_bitMap[0] & 1)) {
       ++it;
@@ -168,14 +197,15 @@ public:
     return it;
   }
 
-  MemPoolIter end() {
+  MemPoolIter end()
+  {
     MemPoolIter endIt(*this);
     endIt.m_bit = SIZE;
     return endIt;
   }
 
 private:
-  uint8_t m_bitMap[SIZE / 8 + 1]{};
+  uint8_t m_bitMap[SIZE / 8 + 1] {};
   uint32_t m_numElements = 0;
   TYPE m_data[SIZE];
 };

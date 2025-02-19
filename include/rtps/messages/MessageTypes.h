@@ -29,9 +29,11 @@ Author: i11 - Embedded Software, RWTH Aachen University
 
 #include <array>
 
-namespace rtps {
+namespace rtps
+{
 
-namespace SMElement {
+namespace SMElement
+{
 // TODO endianess
 enum ParameterId : uint16_t {
   PID_PAD = 0x0000,
@@ -153,7 +155,8 @@ struct Header {
   ProtocolVersion_t protocolVersion;
   VendorId_t vendorId;
   GuidPrefix_t guidPrefix;
-  static constexpr uint16_t getRawSize() {
+  static constexpr uint16_t getRawSize()
+  {
     return sizeof(std::array<uint8_t, 4>) + sizeof(ProtocolVersion_t) +
            sizeof(VendorId_t) + sizeof(GuidPrefix_t);
   }
@@ -163,7 +166,8 @@ struct SubmessageHeader {
   SubmessageKind submessageId;
   uint8_t flags;
   uint16_t octetsToNextHeader;
-  static constexpr uint16_t getRawSize() {
+  static constexpr uint16_t getRawSize()
+  {
     return sizeof(SubmessageKind) + sizeof(uint8_t) + sizeof(uint16_t);
   }
 };
@@ -179,7 +183,8 @@ struct SubmessageDataFrag {
   uint16_t fragmentsInSubmessage;
   uint16_t fragmentSize;
   uint32_t sampleSize;
-  static constexpr uint16_t getRawSize() {
+  static constexpr uint16_t getRawSize()
+  {
     return SubmessageHeader::getRawSize()
            + sizeof(uint16_t)  + sizeof(uint16_t)
            + (2 * 3 + 2 * 1) // EntityID
@@ -198,7 +203,8 @@ struct SubmessageData {
   EntityId_t readerId;
   EntityId_t writerId;
   SequenceNumber_t writerSN;
-  static constexpr uint16_t getRawSize() {
+  static constexpr uint16_t getRawSize()
+  {
     return SubmessageHeader::getRawSize() + sizeof(uint16_t) +
            sizeof(uint16_t) + (2 * 3 + 2 * 1) // EntityID
            + sizeof(SequenceNumber_t);
@@ -212,7 +218,8 @@ struct SubmessageHeartbeat {
   SequenceNumber_t firstSN;
   SequenceNumber_t lastSN;
   Count_t count;
-  static constexpr uint16_t getRawSize() {
+  static constexpr uint16_t getRawSize()
+  {
     return SubmessageHeader::getRawSize() + (2 * 3 + 2 * 1) // EntityID
            + 2 * sizeof(SequenceNumber_t) + sizeof(Count_t);
   }
@@ -222,7 +229,8 @@ struct SubmessageInfoDST {
   SubmessageHeader header;
   GuidPrefix_t guidPrefix;
 
-  static constexpr uint16_t getRawSize() {
+  static constexpr uint16_t getRawSize()
+  {
     return SubmessageHeader::getRawSize() + (sizeof(guidPrefix));
   }
 };
@@ -233,7 +241,8 @@ struct SubmessageAckNack {
   EntityId_t writerId;
   SequenceNumberSet readerSNState;
   Count_t count;
-  static uint16_t getRawSize(const SequenceNumberSet &set) {
+  static uint16_t getRawSize(const SequenceNumberSet &set)
+  {
     uint16_t bitMapSize = 0;
     if (set.numBits != 0) {
       bitMapSize = 4 * ((set.numBits / 32) + 1);
@@ -241,14 +250,16 @@ struct SubmessageAckNack {
     return getRawSizeWithoutSNSet() + sizeof(SequenceNumber_t) +
            sizeof(uint32_t) + bitMapSize; // SequenceNumberSet
   }
-  static uint16_t getRawSizeWithoutSNSet() {
+  static uint16_t getRawSizeWithoutSNSet()
+  {
     return SubmessageHeader::getRawSize() + (2 * 3 + 2 * 1) // EntityID
            + sizeof(Count_t);
   }
 };
 
 template <typename Buffer>
-bool serializeMessage(Buffer &buffer, Header &header) {
+bool serializeMessage(Buffer &buffer, Header &header)
+{
   if (!buffer.reserve(Header::getRawSize())) {
     return false;
   }
@@ -262,7 +273,8 @@ bool serializeMessage(Buffer &buffer, Header &header) {
 }
 
 template <typename Buffer>
-bool serializeMessage(Buffer &buffer, SubmessageHeader &header) {
+bool serializeMessage(Buffer &buffer, SubmessageHeader &header)
+{
   if (!buffer.reserve(Header::getRawSize())) {
     return false;
   }
@@ -277,7 +289,8 @@ bool serializeMessage(Buffer &buffer, SubmessageHeader &header) {
 }
 
 template <typename Buffer>
-bool serializeMessage(Buffer &buffer, SubmessageInfoDST &msg) {
+bool serializeMessage(Buffer &buffer, SubmessageInfoDST &msg)
+{
   if (!buffer.reserve(SubmessageInfoDST::getRawSize())) {
     return false;
   }
@@ -291,7 +304,8 @@ bool serializeMessage(Buffer &buffer, SubmessageInfoDST &msg) {
 }
 
 template <typename Buffer>
-bool serializeMessage(Buffer &buffer, SubmessageData &msg) {
+bool serializeMessage(Buffer &buffer, SubmessageData &msg)
+{
   if (!buffer.reserve(SubmessageData::getRawSize())) {
     return false;
   }
@@ -315,7 +329,8 @@ bool serializeMessage(Buffer &buffer, SubmessageData &msg) {
 }
 
 template <typename Buffer>
-bool serializeMessage(Buffer &buffer, SubmessageDataFrag &msg) {
+bool serializeMessage(Buffer &buffer, SubmessageDataFrag &msg)
+{
   if (!buffer.reserve(SubmessageDataFrag::getRawSize())) {
     return false;
   }
@@ -348,7 +363,8 @@ bool serializeMessage(Buffer &buffer, SubmessageDataFrag &msg) {
 }
 
 template <typename Buffer>
-bool serializeMessage(Buffer &buffer, SubmessageHeartbeat &msg) {
+bool serializeMessage(Buffer &buffer, SubmessageHeartbeat &msg)
+{
   if (!buffer.reserve(SubmessageHeartbeat::getRawSize())) {
     return false;
   }
@@ -375,7 +391,8 @@ bool serializeMessage(Buffer &buffer, SubmessageHeartbeat &msg) {
 }
 
 template <typename Buffer>
-bool serializeMessage(Buffer &buffer, SubmessageAckNack &msg) {
+bool serializeMessage(Buffer &buffer, SubmessageAckNack &msg)
+{
   if (!buffer.reserve(SubmessageAckNack::getRawSize(msg.readerSNState))) {
     return false;
   }
@@ -405,19 +422,23 @@ bool serializeMessage(Buffer &buffer, SubmessageAckNack &msg) {
 
 struct MessageProcessingInfo {
   MessageProcessingInfo(const uint8_t *data, DataSize_t size)
-      : data(data), size(size) {}
+    : data(data), size(size) {}
   const uint8_t *data;
   const DataSize_t size;
 
   //! Offset to the next unprocessed byte
   DataSize_t nextPos = 0;
 
-  inline const uint8_t *getPointerToCurrentPos() const {
+  inline const uint8_t *getPointerToCurrentPos() const
+  {
     return &data[nextPos];
   }
 
   //! Returns the size of data which isn't processed yet
-  inline DataSize_t getRemainingSize() const { return size - nextPos; }
+  inline DataSize_t getRemainingSize() const
+  {
+    return size - nextPos;
+  }
 };
 
 bool deserializeMessage(const MessageProcessingInfo &info, Header &header);

@@ -34,11 +34,13 @@ Author: i11 - Embedded Software, RWTH Aachen University
 
 #include <array>
 
-namespace rtps {
+namespace rtps
+{
 
 class Writer;
 
-class ThreadPool {
+class ThreadPool
+{
 public:
   using receiveJumppad_fp = void (*)(void *callee, const PacketInfo &packet);
 
@@ -67,10 +69,10 @@ private:
   sys_sem_t m_writerNotificationSem;
 
   ThreadSafeCircularBuffer<Writer *, Config::THREAD_POOL_WORKLOAD_QUEUE_LENGTH>
-      m_queueOutgoing;
+  m_queueOutgoing;
   ThreadSafeCircularBuffer<PacketInfo,
                            Config::THREAD_POOL_WORKLOAD_QUEUE_LENGTH>
-      m_queueIncoming;
+                           m_queueIncoming;
 
   static void writerThreadFunction(void *arg);
   static void readerThreadFunction(void *arg);
